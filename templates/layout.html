@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    {% block head %}{% endblock %}
+
+    <title>Mailboar</title>
+    <link rel="stylesheet" href="{{ crate::asset::get_asset_path("main.css") }}">
+  </head>
+
+  <body>
+    {% block body %}
+    {% endblock %}
+
+    <!-- <script src="{{ crate::asset::get_asset_path("vendors.js") }}"></script> -->
+    <script src="{{ crate::asset::get_asset_path("main.js") }}"></script>
+  </body>
+</html>

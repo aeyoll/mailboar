@@ -1,10 +1,17 @@
 use log::info;
 use std::error::Error;
-use std::net::TcpListener;
+use std::net::{IpAddr, TcpListener};
+use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use structopt::StructOpt;
-use tiny_mailcatcher::{http, smtp};
 use tiny_mailcatcher::repository::MessageRepository;
+use tiny_mailcatcher::{http, smtp};
+use warp::Filter;
+
+use crate::templates::index::IndexTemplate;
+
+mod asset;
+mod templates;
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
@@ -15,17 +22,30 @@ async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
     let repository = Arc::new(Mutex::new(MessageRepository::new()));
 
     info!("Mailboar is starting");
+
+    // Start API
     let api_address = format!("{}:{}", &args.ip, args.api_port);
     let api_listener = TcpListener::bind(api_address).unwrap();
     let api_handle = tokio::spawn(http::run_http_server(api_listener, repository.clone()));
 
+    // Start SMTP
     let smtp_address = format!("{}:{}", &args.ip, args.smtp_port);
     let smtp_listener = TcpListener::bind(smtp_address).unwrap();
     let smtp_handle = tokio::spawn(smtp::run_smtp_server(smtp_listener, repository.clone()));
 
-    let (api_res, smtp_res) = tokio::try_join!(api_handle, smtp_handle)?;
+    // Start Frontend
+    let index = warp::path::end().map(|| IndexTemplate {});
+    let static_dir = warp::path("static").and(warp::fs::dir("static"));
 
-    api_res.and(smtp_res)
+    let routes = index.or(static_dir);
+
+    let addr = IpAddr::from_str(&args.ip)?;
+    let res = warp::serve(routes).run((addr, args.http_port)).await;
+    let http_handle = tokio::spawn(async move { res });
+
+    let (api_res, smtp_res, http_res) = tokio::try_join!(api_handle, smtp_handle, http_handle)?;
+
+    api_res.and(smtp_res).and(Ok(http_res))
 }
 
 #[derive(Debug, StructOpt)]
