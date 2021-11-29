@@ -9,7 +9,8 @@ const StyleLintPlugin = require('stylelint-webpack-plugin');
 const ESLintPlugin = require('eslint-webpack-plugin');
 const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
 const RemoveEmptyScriptsPlugin = require('webpack-remove-empty-scripts');
-const PurgecssPlugin = require('purgecss-webpack-plugin');
+// const PurgecssPlugin = require('purgecss-webpack-plugin');
+const { VueLoaderPlugin } = require('vue-loader');
 
 const rootPath = process.cwd();
 
@@ -57,6 +58,10 @@ module.exports = {
         ],
       },
       {
+        test: /\.vue$/,
+        loader: 'vue-loader',
+      },
+      {
         test: /\.scss$/,
         include: assetPath,
         use: [
@@ -70,14 +75,20 @@ module.exports = {
     ],
   },
 
+  resolve: {
+    alias: {
+      'vue$': 'vue/dist/vue.esm.js',
+    },
+  },
+
   plugins: [
     new CleanWebpackPlugin(),
     new ESLintPlugin(),
     new RemoveEmptyScriptsPlugin(),
-    new PurgecssPlugin({
-      paths: glob.sync('templates/**/*',  { nodir: true }),
-      safelist: collectSafelist,
-    }),
+    // new PurgecssPlugin({
+    //   paths: glob.sync('templates/**/*',  { nodir: true }),
+    //   safelist: collectSafelist,
+    // }),
     new WebpackManifestPlugin({
       fileName: 'assets-manifest.json',
       publicPath: '',
@@ -86,6 +97,7 @@ module.exports = {
       failOnError: false,
       syntax: 'scss',
     }),
+    new VueLoaderPlugin(),
   ],
 
 };

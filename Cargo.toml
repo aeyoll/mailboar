@@ -8,7 +8,8 @@ tokio = { version = "1", features = ["full"] }
 structopt = { version = "0.3", default-features = false }
 env_logger = { version = "0.9", default-features = false }
 log = "0.4"
-tiny-mailcatcher = "0.9.1"
+# tiny-mailcatcher = "0.9.1"
+tiny-mailcatcher = { git = "https://github.com/aeyoll/tiny-mailcatcher", branch = "cors" }
 warp = "0.3"
 askama = { version = "0.10", features = ["with-warp", "mime", "mime_guess"] }
 askama_warp = "0.11.0"
