@@ -16,9 +16,11 @@ import VueRouter from 'vue-router';
 Vue.use(VueRouter);
 
 import IndexPage from './pages/IndexPage.vue';
+import MessagePage from './pages/MessagePage.vue';
 
 const routes = [
   { path: '/', component: IndexPage },
+  { path: '/messages/:id', component: MessagePage, name: 'message' },
 ];
 
 const router = new VueRouter({
