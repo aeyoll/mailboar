@@ -28,15 +28,16 @@
       <div class="col-sm-9">
         <div class="card" v-if="message">
           <ul class="nav nav-tabs" data-bs-toggle="tabs">
-            <li class="nav-item" v-for="format in message.formats" :key="format">
-              <a :href="'#tabs-' + format" class="nav-link active" data-bs-toggle="tab">{{ format }}</a>
+            <li class="nav-item" v-for="(format, index) in message.formats" :key="format">
+              <a :href="'#tabs-' + format" class="nav-link" :class="{ 'active': index === 0 }" data-bs-toggle="tab">{{ format }}</a>
             </li>
           </ul>
 
           <div class="card-body">
             <div class="tab-content">
-              <div class="tab-pane active" :id="'tabs-' + format"  v-for="(messageByFormat, format) in messageByFormats" :key="format">
-                <pre><code>{{ messageByFormat }}</code></pre>
+              <div class="tab-pane" :id="'tabs-' + format"  v-for="(messageByFormat, format, index) in messageByFormats" :key="format" :class="{ 'active': index === 0 }">
+                <pre v-if="format !== 'html'"><code>{{ messageByFormat }}</code></pre>
+                <iframe v-else frameborder="0" :srcdoc="messageByFormat" style="width: 100%"></iframe>
               </div>
             </div>
           </div>
@@ -81,10 +82,10 @@ export default {
       await this.message.formats.forEach(format => {
         this
           .getFormat(messageId, format)
-          .then(response => this.$set(this.messageByFormats, format, response.data));
+          .then(response => {
+            this.$set(this.messageByFormats, format, response.data);
+          });
       });
-
-
     }
   },
   mixins: [emailMixin],
