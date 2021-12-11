@@ -27,7 +27,9 @@ function collectSafelist() {
 }
 
 module.exports = {
-  entry: './assets/index.js',
+  context: assetPath,
+
+  entry: './index.js',
 
   output: {
     path: distPath,
