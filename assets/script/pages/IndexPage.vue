@@ -26,7 +26,7 @@ export default {
       .get('http://127.0.0.1:1080/messages')
       .then((response) => {
         const messages = response.data;
-        this.messages = messages;
+        this.messages = messages.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       });
   }
 };
