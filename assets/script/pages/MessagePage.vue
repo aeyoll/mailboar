@@ -6,7 +6,7 @@
           <dl class="row">
             <dt class="col-sm-2">From</dt>
             <dd class="col-sm-9">
-              <span v-if="message && message.sender">{{ message.sender }}</span>
+              <span v-if="message && from">{{ from }}</span>
               <div v-else class="skeleton-line skeleton-line-full"></div>
             </dd>
             <dt class="col-sm-2">Subject</dt>
@@ -16,7 +16,7 @@
             </dd>
             <dt class="col-sm-2">To</dt>
             <dd class="col-sm-9">
-              <span v-if="message && message.recipients">{{ message.recipients.join(', ') }}</span>
+              <span v-if="message && to">{{ to }}</span>
               <div v-else class="skeleton-line skeleton-line-full"></div>
             </dd>
           </dl>
@@ -27,6 +27,8 @@
 </template>
 
 <script>
+import { emailMixin } from '../mixins/email';
+
 export default {
   name: 'message-page',
   data: function () {
@@ -34,6 +36,7 @@ export default {
       message: null
     };
   },
+  mixins: [emailMixin],
   mounted: function () {
     const messageId = this.$route.params.id;
     this
