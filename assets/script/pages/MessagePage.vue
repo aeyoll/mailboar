@@ -37,7 +37,12 @@
             <div class="tab-content">
               <div class="tab-pane" :id="'tabs-' + format"  v-for="(messageByFormat, format, index) in messageByFormats" :key="format" :class="{ 'active': index === 0 }">
                 <pre v-if="format !== 'html'"><code>{{ messageByFormat }}</code></pre>
-                <iframe v-else frameborder="0" :srcdoc="messageByFormat" style="width: 100%"></iframe>
+                <iframe
+                  v-else
+                  frameborder="0"
+                  :srcdoc="messageByFormat"
+                  style="width: 1px; min-width: 100%;"
+                  :height="htmlIframeHeight"></iframe>
               </div>
             </div>
           </div>
@@ -56,6 +61,7 @@ export default {
     return {
       message: null,
       messageByFormats: {},
+      htmlIframeHeight: 0,
     };
   },
   methods: {
@@ -68,6 +74,11 @@ export default {
       return this
         .axios
         .get(`http://127.0.0.1:1080/messages/${messageId}/${format}`);
+    },
+    receiveMessage (event) {
+      if ('frameHeight' in event.data) {
+        this.htmlIframeHeight = event.data.frameHeight;
+      }
     },
     async init() {
       const messageId = this.$route.params.id;
@@ -83,14 +94,39 @@ export default {
         this
           .getFormat(messageId, format)
           .then(response => {
-            this.$set(this.messageByFormats, format, response.data);
+            let content = response.data;
+
+            if (format === 'html') {
+              const postMessage = `
+                <script>
+                const sendPostMessage = () => {
+                  if (height !== document.querySelector('body').offsetHeight) {
+                    var height = document.querySelector('body').offsetHeight;
+                    window.parent.postMessage({
+                      frameHeight: height
+                    }, '*');
+                  }
+                }
+
+                window.onload = () => sendPostMessage();
+                window.onresize = () => sendPostMessage();
+                <\/script>`;
+
+              content = content.replace('</body>', postMessage + '</body>');
+            }
+
+            this.$set(this.messageByFormats, format, content);
           });
       });
     }
   },
   mixins: [emailMixin],
   mounted: function () {
+    window.addEventListener('message', this.receiveMessage);
     this.init();
+  },
+  beforeDestroy () {
+    window.removeEventListener('message', this.receiveMessage)
   }
 };
 </script>
