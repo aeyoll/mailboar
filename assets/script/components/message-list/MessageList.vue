@@ -5,6 +5,7 @@
         <thead>
           <tr>
             <th>From</th>
+            <th>To</th>
             <th>Subject</th>
             <th>Date</th>
             <th class="w-1"></th>
