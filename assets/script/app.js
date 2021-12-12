@@ -15,16 +15,6 @@ Object.keys(Components).forEach(key => {
 import VueRouter from 'vue-router';
 Vue.use(VueRouter);
 
-// Filters
-Vue.filter('capitalize', function (value) {
-  if (!value) {
-    return '';
-  }
-
-  value = value.toString();
-  return value.charAt(0).toUpperCase() + value.slice(1);
-});
-
 import IndexPage from './pages/IndexPage.vue';
 import MessagePage from './pages/MessagePage.vue';
 

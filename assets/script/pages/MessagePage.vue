@@ -28,7 +28,7 @@
                 class="nav-link"
                 :class="{ 'active': index === 0 }"
                 data-bs-toggle="tab"
-              >{{ capitalize(format) }}</a>
+              >{{ format }}</a>
             </li>
           </ul>
 
@@ -133,3 +133,9 @@ export default {
   },
 };
 </script>
+
+<style scoped lang="scss">
+.nav-link {
+  text-transform: capitalize;
+}
+</style>
