@@ -11,8 +11,11 @@
           </tr>
         </thead>
         <tbody>
-          <v-message-list-item v-for="message in messages" :key="message.id" :message="message">
-          </v-message-list-item>
+          <v-message-list-item
+            v-for="message in messages"
+            :key="message.id"
+            :message="message"
+          />
         </tbody>
       </table>
     </div>
@@ -21,9 +24,14 @@
 
 <script>
 export default {
-  name: 'message-list',
+  name: 'MessageList',
   props: {
-    messages: Array
+    messages: {
+      type: Array,
+      default() {
+        return [];
+      },
+    },
   },
 };
 </script>

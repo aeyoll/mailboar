@@ -2,7 +2,7 @@
   "scripts": {
     "build": "webpack --progress --config assets/config/webpack.prod.js",
     "lint": "npm run -s lint:scripts && npm run -s lint:styles",
-    "lint:scripts": "eslint assets/script/**/*.{js,vue}",
+    "lint:scripts": "eslint assets/script/**/**/*.{js,vue}",
     "lint:styles": "stylelint \"assets/styles/**/*.{css,sass,scss}\"",
     "rmdist": "rimraf dist",
     "start": "webpack --watch --config assets/config/webpack.dev.js"

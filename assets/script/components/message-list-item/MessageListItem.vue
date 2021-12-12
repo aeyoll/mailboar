@@ -1,5 +1,8 @@
 <template>
-  <tr class="message-list-item" @click.prevent="goToMessage()">
+  <tr
+    class="message-list-item"
+    @click.prevent="goToMessage()"
+  >
     <td>{{ from }}</td>
     <td>{{ to }}</td>
     <td>{{ message.subject }}</td>
@@ -11,16 +14,21 @@
 import { emailMixin } from '../../mixins/email';
 
 export default {
-  name: 'message-list-item',
-  props: {
-    message: Object,
-  },
+  name: 'MessageListItem',
   mixins: [emailMixin],
+  props: {
+    message: {
+      type: Object,
+      default() {
+        return {};
+      },
+    },
+  },
   methods: {
     goToMessage() {
       this.$router.push({ name: 'message', params: { id: this.message.id }});
-    }
-  }
+    },
+  },
 };
 </script>
 
