@@ -57,7 +57,7 @@ export default {
         .axios
         .get(`http://127.0.0.1:1080/messages/${messageId}/${format}`);
     },
-    receiveMessage (event) {
+    receiveMessageFromIframe(event) {
       if ('frameHeight' in event.data) {
         this.htmlIframeHeight = event.data.frameHeight;
       }
@@ -103,11 +103,11 @@ export default {
     }
   },
   mounted: function () {
-    window.addEventListener('message', this.receiveMessage);
+    window.addEventListener('message', this.receiveMessageFromIframe);
     this.init();
   },
   beforeDestroy () {
-    window.removeEventListener('message', this.receiveMessage)
+    window.removeEventListener('message', this.receiveMessageFromIframe)
   }
 };
 </script>
