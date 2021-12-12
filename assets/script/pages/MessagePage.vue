@@ -10,25 +10,18 @@
       </div>
 
       <div class="col-sm-9">
-        <div
-          v-if="message"
-          class="card"
-        >
-          <ul
-            class="nav nav-tabs"
-            data-bs-toggle="tabs"
-          >
-            <li
-              v-for="(format, index) in message.formats"
-              :key="format"
-              class="nav-item"
-            >
-              <a
-                :href="'#tabs-' + format"
-                class="nav-link"
-                :class="{ 'active': index === 0 }"
-                data-bs-toggle="tab"
-              >{{ format }}</a>
+        <div v-if="message" class="card">
+          <ul class="nav nav-tabs" data-bs-toggle="tabs">
+            <li v-for="(format, index) in message.formats" :key="format" class="nav-item">
+              <a :href="'#tabs-' + format" class="nav-link" :class="{ 'active': index === 0 }" data-bs-toggle="tab">
+                {{ format }}
+              </a>
+            </li>
+
+            <li v-if="message.attachments.length > 0" class="nav-item">
+              <a href="#tabs-attachments" class="nav-link" data-bs-toggle="tab">
+                Attachments
+              </a>
             </li>
           </ul>
 
@@ -49,6 +42,10 @@
                   style="width: 1px; min-width: 100%;"
                   :height="htmlIframeHeight"
                 />
+              </div>
+
+              <div id="tabs-attachments" class="tab-pane">
+                Attachments
               </div>
             </div>
           </div>

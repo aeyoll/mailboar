@@ -39,6 +39,17 @@
     "semi": [
       "error",
       "always"
+    ],
+    "vue/max-attributes-per-line": [
+      "error",
+      {
+        "singleline": {
+          "max": 99
+        },
+        "multiline": {
+          "max": 1
+        }
+      }
     ]
   }
 }
