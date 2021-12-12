@@ -1,35 +1,14 @@
 <template>
-  <dl class="row">
-    <dt class="col-sm-4">
-      From
-    </dt>
-    <dd class="col-sm-8">
-      <span v-if="message && from">{{ from }}</span>
-      <div
-        v-else
-        class="skeleton-line skeleton-line-full"
-      />
-    </dd>
-    <dt class="col-sm-4">
-      Subject
-    </dt>
-    <dd class="col-sm-8">
-      <span v-if="message && message.subject">{{ message.subject }}</span>
-      <div
-        v-else
-        class="skeleton-line skeleton-line-full"
-      />
-    </dd>
-    <dt class="col-sm-4">
-      To
-    </dt>
-    <dd class="col-sm-8">
-      <span v-if="message && to">{{ to }}</span>
-      <div
-        v-else
-        class="skeleton-line skeleton-line-full"
-      />
-    </dd>
+  <dl>
+    <div v-for="(definition, index) in definitions" :key="index" class="row">
+      <dt class="col-sm-4">
+        {{ definition.label }}
+      </dt>
+      <dd class="col-sm-8">
+        <span v-if="message && definition.value">{{ definition.value }}</span>
+        <div v-else class="skeleton-line skeleton-line-full" />
+      </dd>
+    </div>
   </dl>
 </template>
 
@@ -45,6 +24,15 @@ export default {
       default() {
         return {};
       },
+    },
+  },
+  computed: {
+    definitions: function() {
+      return [
+        {'label': 'From', value: this.message ? this.from : null},
+        {'label': 'Subject', value: this.message ? this.message.subject : null},
+        {'label': 'To', value: this.message ? this.to : null},
+      ];
     },
   },
 };
