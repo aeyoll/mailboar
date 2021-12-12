@@ -4,29 +4,51 @@
       <div class="col-sm-3">
         <div class="card">
           <div class="card-body">
-            <v-message-detail-definition :message="message"></v-message-detail-definition>
+            <v-message-detail-definition :message="message" />
           </div>
         </div>
       </div>
 
       <div class="col-sm-9">
-        <div class="card" v-if="message">
-          <ul class="nav nav-tabs" data-bs-toggle="tabs">
-            <li class="nav-item" v-for="(format, index) in message.formats" :key="format">
-              <a :href="'#tabs-' + format" class="nav-link" :class="{ 'active': index === 0 }" data-bs-toggle="tab">{{ format | capitalize }}</a>
+        <div
+          v-if="message"
+          class="card"
+        >
+          <ul
+            class="nav nav-tabs"
+            data-bs-toggle="tabs"
+          >
+            <li
+              v-for="(format, index) in message.formats"
+              :key="format"
+              class="nav-item"
+            >
+              <a
+                :href="'#tabs-' + format"
+                class="nav-link"
+                :class="{ 'active': index === 0 }"
+                data-bs-toggle="tab"
+              >{{ capitalize(format) }}</a>
             </li>
           </ul>
 
           <div class="card-body">
             <div class="tab-content">
-              <div class="tab-pane" :id="'tabs-' + format"  v-for="(messageByFormat, format, index) in messageByFormats" :key="format" :class="{ 'active': index === 0 }">
+              <div
+                v-for="(messageByFormat, format, index) in messageByFormats"
+                :id="'tabs-' + format"
+                :key="format"
+                class="tab-pane"
+                :class="{ 'active': index === 0 }"
+              >
                 <pre v-if="format !== 'html'"><code>{{ messageByFormat }}</code></pre>
                 <iframe
                   v-else
                   frameborder="0"
                   :srcdoc="messageByFormat"
                   style="width: 1px; min-width: 100%;"
-                  :height="htmlIframeHeight"></iframe>
+                  :height="htmlIframeHeight"
+                />
               </div>
             </div>
           </div>
@@ -38,13 +60,20 @@
 
 <script>
 export default {
-  name: 'message-page',
+  name: 'MessagePage',
   data: function () {
     return {
       message: null,
       messageByFormats: {},
       htmlIframeHeight: 0,
     };
+  },
+  mounted: function () {
+    window.addEventListener('message', this.receiveMessageFromIframe);
+    this.init();
+  },
+  beforeUnmount () {
+    window.removeEventListener('message', this.receiveMessageFromIframe);
   },
   methods: {
     getMessage(messageId) {
@@ -92,7 +121,7 @@ export default {
 
                 window.onload = () => sendPostMessage();
                 window.onresize = () => sendPostMessage();
-                <\/script>`;
+                <` + '/script>'; // This is untended
 
               content = content.replace('</body>', postMessage + '</body>');
             }
@@ -100,14 +129,7 @@ export default {
             this.$set(this.messageByFormats, format, content);
           });
       });
-    }
+    },
   },
-  mounted: function () {
-    window.addEventListener('message', this.receiveMessageFromIframe);
-    this.init();
-  },
-  beforeDestroy () {
-    window.removeEventListener('message', this.receiveMessageFromIframe)
-  }
 };
 </script>

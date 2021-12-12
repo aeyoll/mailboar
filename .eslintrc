@@ -1,9 +1,9 @@
 {
   "root": true,
-  "extends": "eslint:recommended",
-  "globals": {
-    "wp": true
-  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:vue/vue3-recommended"
+  ],
   "env": {
     "node": true,
     "es6": true,
