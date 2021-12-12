@@ -13,7 +13,7 @@
         <div class="card" v-if="message">
           <ul class="nav nav-tabs" data-bs-toggle="tabs">
             <li class="nav-item" v-for="(format, index) in message.formats" :key="format">
-              <a :href="'#tabs-' + format" class="nav-link" :class="{ 'active': index === 0 }" data-bs-toggle="tab">{{ format }}</a>
+              <a :href="'#tabs-' + format" class="nav-link" :class="{ 'active': index === 0 }" data-bs-toggle="tab">{{ format | capitalize }}</a>
             </li>
           </ul>
 
