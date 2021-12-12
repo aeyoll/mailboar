@@ -1,8 +1,5 @@
 <template>
-  <tr
-    class="message-list-item"
-    @click.prevent="goToMessage()"
-  >
+  <tr class="message-list-item" @click.prevent="goToMessage()">
     <td>{{ from }}</td>
     <td>{{ to }}</td>
     <td>{{ message.subject }}</td>
