@@ -1,7 +1,7 @@
 <template>
   <div class="card message-list">
     <div class="table-responsive">
-      <table class="table table-vcenter card-table">
+      <table class="table table-vcenter table-striped card-table">
         <thead>
           <tr>
             <th>From</th>
