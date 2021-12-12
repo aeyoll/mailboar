@@ -8,7 +8,6 @@
             <th>To</th>
             <th>Subject</th>
             <th>Date</th>
-            <th class="w-1"></th>
           </tr>
         </thead>
         <tbody>

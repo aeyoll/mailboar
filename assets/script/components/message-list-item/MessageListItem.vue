@@ -1,10 +1,9 @@
 <template>
-  <tr class="message-list-item">
+  <tr class="message-list-item" @click.prevent="goToMessage()">
     <td>{{ from }}</td>
     <td>{{ to }}</td>
     <td>{{ message.subject }}</td>
     <td><abbr :title="formattedDate">{{ relativeDate }}</abbr></td>
-    <td><router-link :to="{ name: 'message', params: { id: message.id }}" class="btn btn-white">View</router-link></td>
   </tr>
 </template>
 
@@ -17,5 +16,16 @@ export default {
     message: Object,
   },
   mixins: [emailMixin],
+  methods: {
+    goToMessage() {
+      this.$router.push({ name: 'message', params: { id: this.message.id }});
+    }
+  }
 };
 </script>
+
+<style scoped lang="scss">
+  .message-list-item {
+    cursor: pointer;
+  }
+</style>
