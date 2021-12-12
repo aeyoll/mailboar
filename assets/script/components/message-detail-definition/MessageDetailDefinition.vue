@@ -30,7 +30,6 @@ export default {
     definitions: function() {
       return [
         {'label': 'From', value: this.message ? this.from : null},
-        {'label': 'Subject', value: this.message ? this.message.subject : null},
         {'label': 'To', value: this.message ? this.to : null},
       ];
     },

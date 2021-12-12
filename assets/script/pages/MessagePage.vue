@@ -1,51 +1,63 @@
 <template>
-  <div class="message">
-    <div class="row">
-      <div class="col-sm-3">
-        <div class="card">
-          <div class="card-body">
-            <v-message-detail-definition :message="message" />
+  <div class="message-page">
+    <div class="page-header">
+      <div class="page-title">
+        <span v-if="message && message.subject">{{ message.subject }}</span>
+        <div v-else class="skeleton-line skeleton-line-full" />
+      </div>
+    </div>
+
+    <div class="page-body">
+      <div class="row">
+        <div class="col-sm-3">
+          <div class="card">
+            <div class="card-body">
+              <v-message-detail-definition :message="message" />
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="col-sm-9">
-        <div v-if="message" class="card">
-          <ul class="nav nav-tabs" data-bs-toggle="tabs">
-            <li v-for="(format, index) in message.formats" :key="format" class="nav-item">
-              <a :href="'#tabs-' + format" class="nav-link" :class="{ 'active': index === 0 }" data-bs-toggle="tab">
-                {{ format }}
-              </a>
-            </li>
+        <div class="col-sm-9">
+          <div v-if="message" class="card">
+            <ul class="nav nav-tabs" data-bs-toggle="tabs">
+              <li v-for="(format, index) in message.formats" :key="format" class="nav-item">
+                <a :href="'#tabs-' + format" class="nav-link" :class="{ 'active': index === 0 }" data-bs-toggle="tab">
+                  {{ format }}
+                </a>
+              </li>
 
-            <li v-if="message.attachments.length > 0" class="nav-item">
-              <a href="#tabs-attachments" class="nav-link" data-bs-toggle="tab">
-                Attachments
-              </a>
-            </li>
-          </ul>
+              <li v-if="message.attachments.length > 0" class="nav-item">
+                <a href="#tabs-attachments" class="nav-link" data-bs-toggle="tab">
+                  Attachments
+                </a>
+              </li>
+            </ul>
 
-          <div class="card-body">
-            <div class="tab-content">
-              <div
-                v-for="(messageByFormat, format, index) in messageByFormats"
-                :id="'tabs-' + format"
-                :key="format"
-                class="tab-pane"
-                :class="{ 'active': index === 0 }"
-              >
-                <pre v-if="format !== 'html'"><code>{{ messageByFormat }}</code></pre>
-                <iframe
-                  v-else
-                  frameborder="0"
-                  :srcdoc="messageByFormat"
-                  style="width: 1px; min-width: 100%;"
-                  :height="htmlIframeHeight"
-                />
-              </div>
+            <div class="card-body">
+              <div class="tab-content">
+                <div
+                  v-for="(messageByFormat, format, index) in messageByFormats"
+                  :id="'tabs-' + format"
+                  :key="format"
+                  class="tab-pane"
+                  :class="{ 'active': index === 0 }"
+                >
+                  <div v-if="format === 'plain'">
+                    {{ messageByFormat }}
+                  </div>
+                  <pre v-if="format === 'source'"><code>{{ messageByFormat }}</code></pre>
+                  <iframe
+                    v-else
+                    frameborder="0"
+                    :srcdoc="messageByFormat"
+                    style="width: 1px; min-width: 100%;"
+                    :height="htmlIframeHeight"
+                  />
+                </div>
 
-              <div id="tabs-attachments" class="tab-pane">
-                <v-message-attachments :attachments="message.attachments" />
+                <div id="tabs-attachments" class="tab-pane">
+                  <v-message-attachments :attachments="message.attachments" />
+                </div>
               </div>
             </div>
           </div>

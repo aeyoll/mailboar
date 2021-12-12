@@ -1,26 +1,26 @@
 <template>
-  <v-message-list
-    v-if="messages.length > 0"
-    :messages="messages"
-  />
-  <div
-    v-else
-    class="container-xl d-flex flex-column justify-content-center"
-  >
-    <div class="empty">
-      <div class="empty-img">
-        <img
-          src="../../images/undraw_empty_street_sfxm.svg"
-          alt=""
-          height="128"
-        >
+  <div class="index-page">
+    <div class="page-header">
+      <div class="page-title">
+        You have {{ messages.length }} message<template v-if="messages.length > 1">s</template>
       </div>
-      <p class="empty-title">
-        No mail to show (yet!)
-      </p>
-      <p class="empty-subtitle text-muted">
-        Send one and refresh this page.
-      </p>
+    </div>
+
+    <div class="page-body">
+      <v-message-list v-if="messages.length > 0" :messages="messages" />
+      <div v-else class="container-xl d-flex flex-column justify-content-center">
+        <div class="empty">
+          <div class="empty-img">
+            <img src="../../images/undraw_empty_street_sfxm.svg" alt="" height="128">
+          </div>
+          <p class="empty-title">
+            No mail to show (yet!)
+          </p>
+          <p class="empty-subtitle text-muted">
+            Send one and refresh this page.
+          </p>
+        </div>
+      </div>
     </div>
   </div>
 </template>
