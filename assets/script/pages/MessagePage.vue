@@ -1,9 +1,22 @@
 <template>
-  <div class="message-page">
+  <div v-if="message" class="message-page">
     <div class="page-header">
-      <div class="page-title">
-        <span v-if="message && message.subject">{{ message.subject }}</span>
-        <div v-else class="skeleton-line skeleton-line-full" />
+      <div class="row align-items-center">
+        <div class="col">
+          <div class="page-pretitle">
+            {{ relativeDate }}
+          </div>
+          <h1 class="page-title">
+            {{ message.subject }}
+          </h1>
+        </div>
+        <div class="col-auto ms-auto">
+          <div class="btn-list">
+            <a href="#" class="btn btn-danger" @click.prevent="deleteMessage()">
+              Delete
+            </a>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -68,8 +81,11 @@
 </template>
 
 <script>
+import { emailMixin } from '../mixins/email';
+
 export default {
   name: 'MessagePage',
+  mixins: [emailMixin],
   data: function () {
     return {
       message: null,
@@ -89,6 +105,14 @@ export default {
       return this
         .axios
         .get(`http://127.0.0.1:1080/messages/${messageId}`);
+    },
+    deleteMessage() {
+      this
+        .axios
+        .delete(`http://127.0.0.1:1080/messages/${this.message.id}`)
+        .then(() => {
+          this.$router.push({'name': 'index'});
+        });
     },
     getFormat(messageId, format) {
       return this

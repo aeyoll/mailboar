@@ -19,7 +19,7 @@ import IndexPage from './pages/IndexPage.vue';
 import MessagePage from './pages/MessagePage.vue';
 
 const routes = [
-  { path: '/', component: IndexPage },
+  { path: '/', component: IndexPage, name: 'index' },
   { path: '/messages/:id', component: MessagePage, name: 'message' },
 ];
 
