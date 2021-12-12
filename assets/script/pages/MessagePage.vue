@@ -45,7 +45,28 @@
               </div>
 
               <div id="tabs-attachments" class="tab-pane">
-                Attachments
+                <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th>Filename</th>
+                      <th>Size</th>
+                      <th>Type</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="attachment in message.attachments" :key="attachment.cid">
+                      <td>
+                        <a :href="'http://127.0.0.1:1080' + attachment.href">{{ attachment.filename }}</a>
+                      </td>
+                      <td>
+                        {{ humanReadableFilesize(attachment.size) }}
+                      </td>
+                      <td>
+                        {{ attachment.type }}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
@@ -56,6 +77,8 @@
 </template>
 
 <script>
+import filesize from 'filesize';
+
 export default {
   name: 'MessagePage',
   data: function () {
@@ -73,6 +96,9 @@ export default {
     window.removeEventListener('message', this.receiveMessageFromIframe);
   },
   methods: {
+    humanReadableFilesize(size) {
+      return filesize(size);
+    },
     getMessage(messageId) {
       return this
         .axios
@@ -118,7 +144,7 @@ export default {
 
                 window.onload = () => sendPostMessage();
                 window.onresize = () => sendPostMessage();
-                <` + '/script>'; // This is untended
+                <` + '/script>'; // This is intended
 
               content = content.replace('</body>', postMessage + '</body>');
             }
