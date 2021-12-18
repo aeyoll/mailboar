@@ -22,15 +22,13 @@
 
     <div class="page-body">
       <div class="row">
-        <div class="col-sm-3">
+        <div class="col-sm-4">
           <div class="card">
-            <div class="card-body">
-              <v-message-detail-definition :message="message" />
-            </div>
+            <v-message-detail-definition :message="message" />
           </div>
         </div>
 
-        <div class="col-sm-9">
+        <div class="col-sm-8">
           <div v-if="message" class="card">
             <ul class="nav nav-tabs" data-bs-toggle="tabs">
               <li v-for="(format, index) in message.formats" :key="format" class="nav-item">
