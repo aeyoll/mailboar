@@ -4,6 +4,13 @@
       <div class="page-title">
         You have {{ messages.length }} message<template v-if="messages.length > 1">s</template>
       </div>
+      <div v-if="messages.length > 0" class="col-auto ms-auto">
+        <div class="btn-list">
+          <a href="#" class="btn btn-danger" @click.prevent="deleteAllMessages()">
+            Delete all messsages
+          </a>
+        </div>
+      </div>
     </div>
 
     <div class="page-body">
@@ -41,6 +48,16 @@ export default {
         const messages = response.data;
         this.messages = messages.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       });
+  },
+  methods: {
+    deleteAllMessages() {
+      this
+        .axios
+        .delete('http://127.0.0.1:1080/messages')
+        .then(() => {
+          this.messages = [];
+        });
+    },
   },
 };
 </script>
