@@ -60,7 +60,7 @@
                   </div>
                   <pre v-if="format === 'source'"><code>{{ messageByFormat }}</code></pre>
                   <iframe
-                    v-else
+                    v-if="format === 'html'"
                     frameborder="0"
                     :srcdoc="messageByFormat"
                     style="width: 1px; min-width: 100%;"
