@@ -147,7 +147,7 @@ export default {
                   if (height !== document.querySelector('body').offsetHeight) {
                     var height = document.querySelector('body').offsetHeight;
                     window.parent.postMessage({
-                      frameHeight: height
+                      frameHeight: height + 50
                     }, '*');
                   }
                 }
