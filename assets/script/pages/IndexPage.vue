@@ -1,14 +1,18 @@
 <template>
   <div class="index-page">
     <div class="page-header">
-      <div class="page-title">
-        You have {{ messages.length }} message<template v-if="messages.length > 1">s</template>
-      </div>
-      <div v-if="messages.length > 0" class="col-auto ms-auto">
-        <div class="btn-list">
-          <a href="#" class="btn btn-danger" @click.prevent="deleteAllMessages()">
-            Delete all messsages
-          </a>
+      <div class="row align-items-center">
+        <div class="col">
+          <div class="page-title">
+            You have {{ messages.length }} message<template v-if="messages.length > 1">s</template>
+          </div>
+        </div>
+        <div v-if="messages.length > 0" class="col-auto ms-auto">
+          <div class="btn-list">
+            <a href="#" class="btn btn-danger" @click.prevent="deleteAllMessages()">
+              Delete all messsages
+            </a>
+          </div>
         </div>
       </div>
     </div>
