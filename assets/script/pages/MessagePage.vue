@@ -156,6 +156,10 @@ export default {
                 window.onresize = () => sendPostMessage();
                 <` + '/script>'; // This is intended
 
+              if (content.indexOf('</body>') === -1) {
+                content = '<body>' + content + '</body>';
+              }
+
               content = content.replace('</body>', postMessage + '</body>');
             }
 
