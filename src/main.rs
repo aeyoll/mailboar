@@ -35,7 +35,7 @@ async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
     let smtp_handle = tokio::spawn(smtp::run_smtp_server(smtp_listener, repository.clone()));
 
     // Start Frontend
-    let index = warp::path::end().map(move || {
+    let index = warp::any().map(move || {
         let template = IndexTemplate {
             api_address: &api_address,
         };
@@ -45,7 +45,7 @@ async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
     });
     let static_dir = warp::path("static").and(warp::fs::dir("static"));
 
-    let routes = index.or(static_dir);
+    let routes = static_dir.or(index);
 
     let addr = IpAddr::from_str(&args.ip)?;
     let res = warp::serve(routes).run((addr, args.http_port)).await;
