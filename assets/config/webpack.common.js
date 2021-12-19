@@ -1,15 +1,12 @@
 'use strict'; // eslint-disable-line
 
-const webpack = require('webpack');
 const path = require('path');
-const glob = require('glob');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const StyleLintPlugin = require('stylelint-webpack-plugin');
 const ESLintPlugin = require('eslint-webpack-plugin');
 const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
 const RemoveEmptyScriptsPlugin = require('webpack-remove-empty-scripts');
-// const PurgecssPlugin = require('purgecss-webpack-plugin');
 const { VueLoaderPlugin } = require('vue-loader');
 
 const rootPath = process.cwd();
@@ -17,14 +14,6 @@ const rootPath = process.cwd();
 const assetPath = path.join(rootPath, 'assets');
 const distPath = path.join(rootPath, 'static');
 const publicPath = '/static/';
-
-function collectSafelist() {
-  return {
-    standard: ['pre'],
-    deep: [],
-    greedy: [],
-  };
-}
 
 module.exports = {
   context: assetPath,
@@ -87,10 +76,6 @@ module.exports = {
     new CleanWebpackPlugin(),
     new ESLintPlugin(),
     new RemoveEmptyScriptsPlugin(),
-    // new PurgecssPlugin({
-    //   paths: glob.sync('templates/**/*',  { nodir: true }),
-    //   safelist: collectSafelist,
-    // }),
     new WebpackManifestPlugin({
       fileName: 'assets-manifest.json',
       publicPath: '',

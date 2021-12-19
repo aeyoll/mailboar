@@ -1,9 +1,16 @@
+const glob = require('glob-all');
 const { merge } = require('webpack-merge');
 const ImageminPlugin = require('imagemin-webpack-plugin').default;
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
+const PurgecssPlugin = require('purgecss-webpack-plugin');
 
 const common = require('./webpack.common.js');
+
+const purgeFromVue = (content) => {
+  const contentWithoutStyleBlocks = content.replace(/<style[^]+?<\/style>/gi, '');
+  return contentWithoutStyleBlocks.match(/[A-Za-z0-9-_/:]*[A-Za-z0-9-_/]+/g) || [];
+};
 
 module.exports = merge(common, {
   mode: 'production',
@@ -46,6 +53,25 @@ module.exports = merge(common, {
         //   to: 'fonts/[path][name].[contenthash:8][ext]',
         // },
       ],
+    }),
+    new PurgecssPlugin({
+      paths: glob.sync([
+        'assets/**/*.js',
+        'assets/**/*.scss',
+        'assets/**/*.vue',
+        'templates/**/*',
+      ],  { nodir: true }),
+
+      // Needed for vue.js
+      extractors: [
+        {
+          extractor: purgeFromVue,
+          extensions: ['vue'],
+        },
+      ],
+
+      safelist: [ /-(leave|enter|appear)(|-(to|from|active))$/, /^(?!(|.*?:)cursor-move).+-move$/, /^router-link(|-exact)-active$/, /data-v-.*/ ],
+      // safelist: collectSafelist,
     }),
   ],
 });
