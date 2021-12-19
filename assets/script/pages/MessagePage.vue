@@ -30,19 +30,21 @@
 
         <div class="col-sm-8">
           <div v-if="message" class="card">
-            <ul class="nav nav-tabs" data-bs-toggle="tabs">
-              <li v-for="(format, index) in message.formats" :key="format" class="nav-item">
-                <a :href="'#tabs-' + format" class="nav-link" :class="{ 'active': index === 0 }" data-bs-toggle="tab">
-                  {{ format }}
-                </a>
-              </li>
+            <div class="card-header">
+              <ul class="nav nav-pills card-header-pills" data-bs-toggle="tabs">
+                <li v-for="(format, index) in message.formats" :key="format" class="nav-item">
+                  <a :href="'#tabs-' + format" class="nav-link" :class="{ 'active': index === 0 }" data-bs-toggle="tab">
+                    {{ format }}
+                  </a>
+                </li>
 
-              <li v-if="message.attachments.length > 0" class="nav-item">
-                <a href="#tabs-attachments" class="nav-link" data-bs-toggle="tab">
-                  Attachments
-                </a>
-              </li>
-            </ul>
+                <li v-if="message.attachments.length > 0" class="nav-item">
+                  <a href="#tabs-attachments" class="nav-link" data-bs-toggle="tab">
+                    Attachments
+                  </a>
+                </li>
+              </ul>
+            </div>
 
             <div class="card-body">
               <div class="tab-content">
