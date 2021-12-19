@@ -1,6 +1,5 @@
 const { merge } = require('webpack-merge');
-const { default: ImageminPlugin } = require('imagemin-webpack-plugin');
-const imageminMozjpeg = require('imagemin-mozjpeg');
+const ImageminPlugin = require('imagemin-webpack-plugin').default;
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 
@@ -31,13 +30,7 @@ module.exports = merge(common, {
     ],
   },
   plugins: [
-    new ImageminPlugin({
-      optipng: { optimizationLevel: 7 },
-      gifsicle: { optimizationLevel: 3 },
-      pngquant: { quality: '65-90', speed: 4 },
-      svgo: { removeUnknownsAndDefaults: false, cleanupIDs: false },
-      plugins: [imageminMozjpeg({ quality: 75 })],
-    }),
+    new ImageminPlugin(),
     new MiniCssExtractPlugin({
       filename: 'styles/[name].[contenthash:8].css',
       chunkFilename: 'styles/[id].css',
