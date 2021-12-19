@@ -43,7 +43,9 @@ async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
             .body(template.render().unwrap())
             .unwrap()
     });
-    let static_dir = warp::path("static").and(warp::fs::dir("static"));
+    let static_dir = warp::path("static")
+        .and(warp::fs::dir("static"))
+        .with(warp::compression::gzip());
 
     let routes = static_dir.or(index);
 
