@@ -97,7 +97,7 @@ module.exports = {
     }),
     new StyleLintPlugin({
       failOnError: false,
-      syntax: 'scss',
+      customSyntax: 'postcss-scss',
     }),
     new VueLoaderPlugin(),
   ],
