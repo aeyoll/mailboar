@@ -58,7 +58,7 @@
                   <div v-if="format === 'plain'">
                     {{ messageByFormat }}
                   </div>
-                  <pre v-if="format === 'source'"><code>{{ messageByFormat }}</code></pre>
+                  <div v-if="format === 'source'" class="format-source">{{ messageByFormat }}</div>
                   <iframe
                     v-if="format === 'html'"
                     frameborder="0"
@@ -176,7 +176,14 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import '~@tabler/core/src/scss/_config.scss';
+
 .nav-link {
   text-transform: capitalize;
+}
+
+.format-source {
+  font-family: $font-family-monospace;
+  white-space: pre-line;
 }
 </style>
