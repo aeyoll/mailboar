@@ -1,3 +1,4 @@
+use askama::Template;
 use log::info;
 use std::error::Error;
 use std::net::{IpAddr, TcpListener};
@@ -25,7 +26,7 @@ async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
 
     // Start API
     let api_address = format!("{}:{}", &args.ip, args.api_port);
-    let api_listener = TcpListener::bind(api_address).unwrap();
+    let api_listener = TcpListener::bind(&api_address).unwrap();
     let api_handle = tokio::spawn(http::run_http_server(api_listener, repository.clone()));
 
     // Start SMTP
@@ -34,7 +35,14 @@ async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
     let smtp_handle = tokio::spawn(smtp::run_smtp_server(smtp_listener, repository.clone()));
 
     // Start Frontend
-    let index = warp::path::end().map(|| IndexTemplate {});
+    let index = warp::path::end().map(move || {
+        let template = IndexTemplate {
+            api_address: &api_address,
+        };
+        warp::http::Response::builder()
+            .body(template.render().unwrap())
+            .unwrap()
+    });
     let static_dir = warp::path("static").and(warp::fs::dir("static"));
 
     let routes = index.or(static_dir);

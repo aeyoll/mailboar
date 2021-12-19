@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block body %}
-<div id="app">
+<div id="app" data-api-address="{{ api_address }}">
   <router-view></router-view>
 </div>
 {% endblock %}

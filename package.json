@@ -49,6 +49,7 @@
     "vue": "^2.6.14",
     "vue-axios": "^3.4.0",
     "vue-progressbar": "^0.7.5",
-    "vue-router": "^3.5.3"
+    "vue-router": "^3.5.3",
+    "vuex": "^3.6.2"
   }
 }

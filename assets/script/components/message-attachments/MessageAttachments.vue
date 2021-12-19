@@ -10,7 +10,7 @@
     <tbody>
       <tr v-for="attachment in attachments" :key="attachment.cid">
         <td>
-          <a :href="'http://127.0.0.1:1080' + attachment.href">{{ attachment.filename }}</a>
+          <a :href="store.apiAddress + attachment.href">{{ attachment.filename }}</a>
         </td>
         <td>
           {{ humanReadableFilesize(attachment.size) }}
@@ -25,6 +25,7 @@
 
 <script>
 import filesize from 'filesize';
+import { mapState } from 'vuex';
 
 export default {
   name: 'MessageAttachments',
@@ -36,6 +37,9 @@ export default {
       },
     },
   },
+  computed: mapState({
+    apiAddress: state => state.apiAddress,
+  }),
   methods: {
     humanReadableFilesize(size) {
       return filesize(size);

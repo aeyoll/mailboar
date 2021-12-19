@@ -2,4 +2,6 @@ use askama::Template;
 
 #[derive(Template)]
 #[template(path = "index.html")]
-pub struct IndexTemplate {}
+pub struct IndexTemplate<'a> {
+    pub api_address: &'a str,
+}

@@ -80,6 +80,7 @@
 
 <script>
 import { emailMixin } from '../mixins/email';
+import { mapState } from 'vuex';
 
 export default {
   name: 'MessagePage',
@@ -91,6 +92,9 @@ export default {
       htmlIframeHeight: 0,
     };
   },
+  computed: mapState({
+    apiAddress: state => state.apiAddress,
+  }),
   mounted: function () {
     window.addEventListener('message', this.receiveMessageFromIframe);
     this.init();
@@ -102,12 +106,12 @@ export default {
     getMessage(messageId) {
       return this
         .axios
-        .get(`http://127.0.0.1:1080/messages/${messageId}`);
+        .get(`${this.apiAddress}/messages/${messageId}`);
     },
     deleteMessage() {
       this
         .axios
-        .delete(`http://127.0.0.1:1080/messages/${this.message.id}`)
+        .delete(`${this.apiAddress}/messages/${this.message.id}`)
         .then(() => {
           this.$router.push({'name': 'index'});
         });
@@ -115,7 +119,7 @@ export default {
     getFormat(messageId, format) {
       return this
         .axios
-        .get(`http://127.0.0.1:1080/messages/${messageId}/${format}`);
+        .get(`${this.apiAddress}/messages/${messageId}/${format}`);
     },
     receiveMessageFromIframe(event) {
       if ('frameHeight' in event.data) {

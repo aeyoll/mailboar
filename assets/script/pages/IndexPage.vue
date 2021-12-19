@@ -37,6 +37,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 export default {
   name: 'IndexPage',
   data: function () {
@@ -44,10 +45,13 @@ export default {
       messages: [],
     };
   },
+  computed: mapState({
+    apiAddress: state => state.apiAddress,
+  }),
   mounted: function () {
     this
       .axios
-      .get('http://127.0.0.1:1080/messages')
+      .get(`${this.apiAddress}/messages`)
       .then((response) => {
         const messages = response.data;
         this.messages = messages.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
@@ -57,7 +61,7 @@ export default {
     deleteAllMessages() {
       this
         .axios
-        .delete('http://127.0.0.1:1080/messages')
+        .delete(`${this.apiAddress}/messages`)
         .then(() => {
           this.messages = [];
         });

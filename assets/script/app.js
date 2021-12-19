@@ -11,6 +11,18 @@ Object.keys(Components).forEach(key => {
   Vue.component(`V${key}`, Components[key]);
 });
 
+// Vuex
+import Vuex from 'vuex';
+Vue.use(Vuex);
+
+const apiAddress = document.getElementById('app').dataset.apiAddress ?? '127.0.0.1:1080';
+
+const store = new Vuex.Store({
+  state: {
+    apiAddress: `http://${apiAddress}`,
+  },
+});
+
 // Router
 import VueRouter from 'vue-router';
 Vue.use(VueRouter);
@@ -30,5 +42,6 @@ const router = new VueRouter({
 // eslint-disable-next-line no-unused-vars
 const app = new Vue({
   router,
+  store,
   el: '#app',
 });
