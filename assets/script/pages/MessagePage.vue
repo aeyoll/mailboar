@@ -108,7 +108,7 @@ export default {
     getMessage(messageId) {
       return this
         .axios
-        .get(`${this.apiAddress}/messages/${messageId}`);
+        .get(`${this.apiAddress}/messages/${messageId}.json`);
     },
     deleteMessage() {
       this
@@ -121,7 +121,7 @@ export default {
     getFormat(messageId, format) {
       return this
         .axios
-        .get(`${this.apiAddress}/messages/${messageId}/${format}`);
+        .get(`${this.apiAddress}/messages/${messageId}.${format}`);
     },
     receiveMessageFromIframe(event) {
       if ('frameHeight' in event.data) {
