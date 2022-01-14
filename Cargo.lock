@@ -1230,9 +1230,9 @@ dependencies = [
 
 [[package]]
 name = "tiny-mailcatcher"
-version = "0.9.2"
+version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "80f4038104fb69e5a196c6fd173e0133bb35b3ff33b5698463e53ffde579d7f5"
+checksum = "dd60463236e9b6650ed34d9bef13847b0f96e2de8eca351d00835068d897af8c"
 dependencies = [
  "chrono",
  "env_logger",
