@@ -2,6 +2,8 @@
 name = "mailboar"
 version = "0.1.0"
 edition = "2021"
+description = "A web interface for Tiny MailCatcher, a MailCatcher clone"
+license = "MIT"
 
 [dependencies]
 tokio = { version = "1", features = ["full"] }
