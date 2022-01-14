@@ -10,7 +10,7 @@
         <div v-if="messages.length > 0" class="col-auto ms-auto">
           <div class="btn-list">
             <a href="#" class="btn btn-danger" @click.prevent="deleteAllMessages()">
-              Delete all messsages
+              Delete all messages
             </a>
           </div>
         </div>
