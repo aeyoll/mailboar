@@ -135,6 +135,7 @@ export default {
         .getMessage(messageId)
         .then(response => {
           const message = response.data;
+          message.formats.sort((a) => a === 'html' ? -1 : 1);
           this.message = message;
         });
 
