@@ -53,18 +53,17 @@
                   :id="'tabs-' + format"
                   :key="format"
                   class="tab-pane"
-                  :class="{ 'active': index === 0 }"
+                  :class="{ 'active': format === 'html' || index === 1 }"
                 >
                   <div v-if="format === 'plain'">
                     {{ messageByFormat }}
                   </div>
-                  <div v-if="format === 'source'" class="format-source">{{ messageByFormat }}</div>
-                  <iframe
-                    v-if="format === 'html'"
-                    frameborder="0"
-                    :srcdoc="messageByFormat"
-                    style="width: 1px; min-width: 100%;"
-                    :height="htmlIframeHeight"
+                  <div v-if="format === 'source'" class="format-source">
+                    {{ messageByFormat }}
+                  </div>
+                  <v-message-html
+                    v-if="format === 'html' && parsedMessage !== null"
+                    :parsed-message="parsedMessage"
                   />
                 </div>
 
@@ -83,27 +82,30 @@
 <script>
 import { emailMixin } from '../mixins/email';
 import { mapState } from 'vuex';
+import * as PostalMime from 'postal-mime';
 
 export default {
   name: 'MessagePage',
+
   mixins: [emailMixin],
+
   data: function () {
     return {
       message: null,
+      parsedMessage: null,
       messageByFormats: {},
-      htmlIframeHeight: 0,
+      inlineContent: {},
     };
   },
+
   computed: mapState({
     apiAddress: state => state.apiAddress,
   }),
+
   mounted: function () {
-    window.addEventListener('message', this.receiveMessageFromIframe);
     this.init();
   },
-  beforeUnmount () {
-    window.removeEventListener('message', this.receiveMessageFromIframe);
-  },
+
   methods: {
     getMessage(messageId) {
       return this
@@ -123,10 +125,19 @@ export default {
         .axios
         .get(`${this.apiAddress}/messages/${messageId}.${format}`);
     },
-    receiveMessageFromIframe(event) {
-      if ('frameHeight' in event.data) {
-        this.htmlIframeHeight = event.data.frameHeight;
-      }
+    async getSource(messageId) {
+      await this
+        .getFormat(messageId, 'source')
+        .then(response => {
+          let content = response.data;
+          this.$set(this.messageByFormats, 'source', content);
+
+          // Parse the email
+          const parser = new PostalMime.default();
+          parser.parse(content).then(res => {
+            this.parsedMessage = res;
+          });
+        });
     },
     async init() {
       const messageId = this.$route.params.id;
@@ -139,35 +150,18 @@ export default {
           this.message = message;
         });
 
-      await this.message.formats.forEach(format => {
+      await this.getSource(messageId);
+
+      const formats = this
+        .message
+        .formats
+        .filter(format => ['source'].includes(format) === false);
+
+      await formats.forEach(format => {
         this
           .getFormat(messageId, format)
           .then(response => {
             let content = response.data;
-
-            if (format === 'html') {
-              const postMessage = `
-                <script>
-                const sendPostMessage = () => {
-                  if (height !== document.querySelector('body').offsetHeight) {
-                    var height = document.querySelector('body').offsetHeight;
-                    window.parent.postMessage({
-                      frameHeight: height + 50
-                    }, '*');
-                  }
-                }
-
-                window.onload = () => sendPostMessage();
-                window.onresize = () => sendPostMessage();
-                <` + '/script>'; // This is intended
-
-              if (content.indexOf('</body>') === -1) {
-                content = '<body>' + content + '</body>';
-              }
-
-              content = content.replace('</body>', postMessage + '</body>');
-            }
-
             this.$set(this.messageByFormats, format, content);
           });
       });
