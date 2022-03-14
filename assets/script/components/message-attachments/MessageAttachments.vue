@@ -10,7 +10,7 @@
     <tbody>
       <tr v-for="attachment in attachments" :key="attachment.cid">
         <td>
-          <a :href="store.apiAddress + attachment.href">{{ attachment.filename }}</a>
+          <a :href="store.apiUrl + attachment.href">{{ attachment.filename }}</a>
         </td>
         <td>
           {{ humanReadableFilesize(attachment.size) }}
@@ -38,7 +38,7 @@ export default {
     },
   },
   computed: mapState({
-    apiAddress: state => state.apiAddress,
+    apiUrl: state => state.apiUrl,
   }),
   methods: {
     humanReadableFilesize(size) {

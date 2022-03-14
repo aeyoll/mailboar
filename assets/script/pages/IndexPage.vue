@@ -46,12 +46,12 @@ export default {
     };
   },
   computed: mapState({
-    apiAddress: state => state.apiAddress,
+    apiUrl: state => state.apiUrl,
   }),
   mounted: function () {
     this
       .axios
-      .get(`${this.apiAddress}/messages`)
+      .get(`${this.apiUrl}/messages`)
       .then((response) => {
         const messages = response.data;
         this.messages = messages.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
@@ -61,7 +61,7 @@ export default {
     deleteAllMessages() {
       this
         .axios
-        .delete(`${this.apiAddress}/messages`)
+        .delete(`${this.apiUrl}/messages`)
         .then(() => {
           this.messages = [];
         });

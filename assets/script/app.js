@@ -15,11 +15,11 @@ Object.keys(Components).forEach(key => {
 import Vuex from 'vuex';
 Vue.use(Vuex);
 
-const apiAddress = document.getElementById('app').dataset.apiAddress ?? '127.0.0.1:1080';
+const apiUrl = document.getElementById('app').dataset.apiUrl ?? 'http://127.0.0.1:1080';
 
 const store = new Vuex.Store({
   state: {
-    apiAddress: `http://${apiAddress}`,
+    apiUrl: apiUrl,
   },
 });
 

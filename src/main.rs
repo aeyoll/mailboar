@@ -35,9 +35,10 @@ async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
     let smtp_handle = tokio::spawn(smtp::run_smtp_server(smtp_listener, repository.clone()));
 
     // Start Frontend
+    let api_url = args.api_url;
     let index = warp::any().map(move || {
         let template = IndexTemplate {
-            api_address: &api_address,
+            api_url: &api_url,
         };
         warp::reply::html(template.render().unwrap())
     });
@@ -61,6 +62,9 @@ async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
 struct Options {
     #[structopt(long, default_value = "127.0.0.1")]
     ip: String,
+
+    #[structopt(long, default_value = "http://127.0.0.1:1080")]
+    api_url: String,
 
     #[structopt(long, name = "smtp-port", default_value = "1025")]
     smtp_port: u16,

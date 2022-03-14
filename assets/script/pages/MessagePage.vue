@@ -99,7 +99,7 @@ export default {
   },
 
   computed: mapState({
-    apiAddress: state => state.apiAddress,
+    apiUrl: state => state.apiUrl,
   }),
 
   mounted: function () {
@@ -110,12 +110,12 @@ export default {
     getMessage(messageId) {
       return this
         .axios
-        .get(`${this.apiAddress}/messages/${messageId}.json`);
+        .get(`${this.apiUrl}/messages/${messageId}.json`);
     },
     deleteMessage() {
       this
         .axios
-        .delete(`${this.apiAddress}/messages/${this.message.id}`)
+        .delete(`${this.apiUrl}/messages/${this.message.id}`)
         .then(() => {
           this.$router.push({'name': 'index'});
         });
@@ -123,7 +123,7 @@ export default {
     getFormat(messageId, format) {
       return this
         .axios
-        .get(`${this.apiAddress}/messages/${messageId}.${format}`);
+        .get(`${this.apiUrl}/messages/${messageId}.${format}`);
     },
     async getSource(messageId) {
       await this
