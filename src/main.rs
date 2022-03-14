@@ -39,9 +39,7 @@ async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
         let template = IndexTemplate {
             api_address: &api_address,
         };
-        warp::http::Response::builder()
-            .body(template.render().unwrap())
-            .unwrap()
+        warp::reply::html(template.render().unwrap())
     });
     let static_dir = warp::path("static")
         .and(warp::fs::dir("static"))
