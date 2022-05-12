@@ -32,8 +32,8 @@
           <div v-if="message" class="card">
             <div class="card-header">
               <ul class="nav nav-pills card-header-pills" data-bs-toggle="tabs">
-                <li v-for="(format, index) in message.formats" :key="format" class="nav-item">
-                  <a :href="'#tabs-' + format" class="nav-link" :class="{ 'active': index === 0 }" data-bs-toggle="tab">
+                <li v-for="(format) in message.formats" :key="format" class="nav-item">
+                  <a :href="'#tabs-' + format" class="nav-link" :class="{ 'active': activeFormat === format }" data-bs-toggle="tab">
                     {{ format }}
                   </a>
                 </li>
@@ -49,11 +49,11 @@
             <div class="card-body">
               <div class="tab-content">
                 <div
-                  v-for="(messageByFormat, format, index) in messageByFormats"
+                  v-for="(messageByFormat, format) in messageByFormats"
                   :id="'tabs-' + format"
                   :key="format"
                   class="tab-pane"
-                  :class="{ 'active': format === 'html' || index === 1 }"
+                  :class="{ 'active': format === activeFormat }"
                 >
                   <div v-if="format === 'plain'">
                     {{ messageByFormat }}
@@ -91,6 +91,7 @@ export default {
 
   data: function () {
     return {
+      activeFormat: 'source',
       message: null,
       parsedMessage: null,
       messageByFormats: {},
@@ -163,6 +164,10 @@ export default {
           .then(response => {
             let content = response.data;
             this.$set(this.messageByFormats, format, content);
+
+            if (format === 'html') {
+              this.activeFormat = 'html';
+            }
           });
       });
     },
