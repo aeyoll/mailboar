@@ -1,6 +1,7 @@
 'use strict'; // eslint-disable-line
 
 const path = require('path');
+const webpack = require('webpack');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const StyleLintPlugin = require('stylelint-webpack-plugin');
@@ -68,7 +69,8 @@ module.exports = {
 
   resolve: {
     alias: {
-      'vue$': 'vue/dist/vue.esm.js',
+      'vue': 'vue/dist/vue.esm-bundler',
+      'vuex': 'vuex/dist/vuex.esm-bundler',
     },
   },
 
@@ -85,6 +87,10 @@ module.exports = {
       customSyntax: 'postcss-scss',
     }),
     new VueLoaderPlugin(),
+    new webpack.DefinePlugin({
+      __VUE_OPTIONS_API__: true,
+      __VUE_PROD_DEVTOOLS__: false,
+    }),
   ],
 
 };

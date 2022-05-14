@@ -131,7 +131,7 @@ export default {
         .getFormat(messageId, 'source')
         .then(response => {
           let content = response.data;
-          this.$set(this.messageByFormats, 'source', content);
+          this.messageByFormats['source'] = content;
 
           // Parse the email
           const parser = new PostalMime.default();
@@ -163,7 +163,7 @@ export default {
           .getFormat(messageId, format)
           .then(response => {
             let content = response.data;
-            this.$set(this.messageByFormats, format, content);
+            this.messageByFormats[format] = content;
 
             if (format === 'html') {
               this.activeFormat = 'html';

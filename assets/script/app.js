@@ -1,32 +1,51 @@
-import Vue from 'vue';
+import { createApp } from 'vue';
+
+const app = createApp();
 
 // Axios
-import instance from './plugins/axios';
+// ----------------------------------------------------------------------------
+import axios from 'axios';
+import axiosRetry from 'axios-retry';
 import VueAxios from 'vue-axios';
-Vue.use(VueAxios, instance);
+
+const instance = axios.create({
+  timeout: 10000,
+  headers: {'X-Requested-With': 'XMLHttpRequest'},
+});
+
+axiosRetry(instance, {
+  retries: 3,
+  shouldResetTimeout: true,
+  retryCondition: (error) => axiosRetry.isNetworkOrIdempotentRequestError(error) || error.code === 'ECONNABORTED',
+});
+
+window.axios = instance;
+app.use(VueAxios, instance);
 
 // Components
+// ----------------------------------------------------------------------------
 import Components from './components/index';
 Object.keys(Components).forEach(key => {
-  Vue.component(`V${key}`, Components[key]);
+  app.component(`V${key}`, Components[key]);
 });
 
 // Vuex
-import Vuex from 'vuex';
-Vue.use(Vuex);
-
+// ----------------------------------------------------------------------------
 const apiUrl = document.getElementById('app').dataset.apiUrl ?? 'http://127.0.0.1:1080';
 
-const store = new Vuex.Store({
-  state: {
-    apiUrl: apiUrl,
+import { createStore } from 'vuex';
+const store = createStore({
+  state () {
+    return {
+      apiUrl: apiUrl,
+    };
   },
 });
+app.use(store);
 
 // Router
-import VueRouter from 'vue-router';
-Vue.use(VueRouter);
-
+// ----------------------------------------------------------------------------
+import { createRouter, createWebHistory } from 'vue-router';
 import IndexPage from './pages/IndexPage.vue';
 import MessagePage from './pages/MessagePage.vue';
 
@@ -35,14 +54,10 @@ const routes = [
   { path: '/messages/:id', component: MessagePage, name: 'message' },
 ];
 
-const router = new VueRouter({
-  mode: 'history',
+const router = createRouter({
+  history: createWebHistory(),
   routes,
 });
+app.use(router);
 
-// eslint-disable-next-line no-unused-vars
-const app = new Vue({
-  router,
-  store,
-  el: '#app',
-});
+app.mount('#app');
