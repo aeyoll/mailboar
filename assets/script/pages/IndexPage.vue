@@ -43,21 +43,39 @@ export default {
   data: function () {
     return {
       messages: [],
+      socket: null,
     };
   },
   computed: mapState({
     apiUrl: state => state.apiUrl,
   }),
   mounted: function () {
-    this
-      .axios
-      .get(`${this.apiUrl}/messages`)
-      .then((response) => {
-        const messages = response.data;
-        this.messages = messages.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      });
+    this.getMessages();
+
+    this.socket = new WebSocket('ws://127.0.0.1:3012/');
+
+    this.socket.addEventListener('open', () => {
+      console.log('Connected to WebSocket server');
+    });
+
+    this.socket.addEventListener('message',  (event) => {
+      console.log('Message received:', event.data);
+      this.getMessages();
+    });
+  },
+  unmounted() {
+    this.socket.close();
   },
   methods: {
+    getMessages() {
+      this
+        .axios
+        .get(`${this.apiUrl}/messages`)
+        .then((response) => {
+          const messages = response.data;
+          this.messages = messages.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        });
+    },
     deleteAllMessages() {
       this
         .axios

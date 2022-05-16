@@ -6,7 +6,8 @@ use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use structopt::StructOpt;
 use tiny_mailcatcher::repository::MessageRepository;
-use tiny_mailcatcher::{http, smtp};
+use tiny_mailcatcher::{http, smtp, ws};
+use crossbeam_channel::unbounded;
 use warp::Filter;
 
 use crate::templates::index::IndexTemplate;
@@ -24,15 +25,23 @@ async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
 
     info!("Mailboar is starting");
 
+    // Channel
+    let (s, r) = unbounded();
+
     // Start API
     let api_address = format!("{}:{}", &args.ip, args.api_port);
     let api_listener = TcpListener::bind(&api_address).unwrap();
     let api_handle = tokio::spawn(http::run_http_server(api_listener, repository.clone()));
 
     // Start SMTP
-    let smtp_address = format!("{}:{}", &args.ip, args.smtp_port);
-    let smtp_listener = TcpListener::bind(smtp_address).unwrap();
-    let smtp_handle = tokio::spawn(smtp::run_smtp_server(smtp_listener, repository.clone()));
+    let smtp_addr = format!("{}:{}", &args.ip, args.smtp_port);
+    let smtp_listener = TcpListener::bind(smtp_addr).unwrap();
+    let smtp_handle = tokio::spawn(smtp::run_smtp_server(smtp_listener, repository.clone(), s));
+
+    // Start WS
+    let ws_addr = format!("{}:{}", &args.ip, args.ws_port);
+    let ws_listener = TcpListener::bind(ws_addr).unwrap();
+    let ws_handle = tokio::spawn(ws::run_ws_server(ws_listener, r));
 
     // Start Frontend
     let api_url = args.api_url;
@@ -52,7 +61,7 @@ async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
     let res = warp::serve(routes).run((addr, args.http_port)).await;
     let http_handle = tokio::spawn(async move { res });
 
-    let (api_res, smtp_res, http_res) = tokio::try_join!(api_handle, smtp_handle, http_handle)?;
+    let (api_res, smtp_res, http_res, ws_res) = tokio::try_join!(api_handle, smtp_handle, http_handle, ws_handle)?;
 
     api_res.and(smtp_res).and(Ok(http_res))
 }
@@ -74,4 +83,7 @@ struct Options {
 
     #[structopt(long, name = "http-port", default_value = "8025")]
     http_port: u16,
+
+    #[structopt(long, name = "ws-port", default_value = "3012")]
+    ws_port: u16,
 }
