@@ -1,6 +1,6 @@
 [package]
 name = "mailboar"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 description = "A web interface for Tiny MailCatcher, a MailCatcher clone"
 license = "MIT"
