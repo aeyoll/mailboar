@@ -24,7 +24,7 @@
 </template>
 
 <script>
-import filesize from 'filesize';
+import { filesize } from 'filesize';
 import { mapState } from 'vuex';
 
 export default {

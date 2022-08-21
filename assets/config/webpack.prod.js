@@ -3,7 +3,7 @@ const { merge } = require('webpack-merge');
 const ImageminPlugin = require('imagemin-webpack-plugin').default;
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
-const PurgecssPlugin = require('purgecss-webpack-plugin');
+const { PurgeCSSPlugin } = require('purgecss-webpack-plugin');
 
 const common = require('./webpack.common.js');
 
@@ -54,7 +54,7 @@ module.exports = merge(common, {
         // },
       ],
     }),
-    new PurgecssPlugin({
+    new PurgeCSSPlugin({
       paths: glob.sync([
         'assets/**/*.js',
         'assets/**/*.scss',
