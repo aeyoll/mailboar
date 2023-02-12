@@ -37,9 +37,7 @@ async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
     // Start Frontend
     let api_url = args.api_url;
     let index = warp::any().map(move || {
-        let template = IndexTemplate {
-            api_url: &api_url,
-        };
+        let template = IndexTemplate { api_url: &api_url };
         warp::reply::html(template.render().unwrap())
     });
     let static_dir = warp::path("static")
