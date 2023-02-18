@@ -1,8 +1,7 @@
+use crate::html_template::HtmlTemplate;
 use crate::options::Options;
 use crate::templates::index::IndexTemplate;
-use askama::Template;
 use axum::extract::State;
-use axum::response::{Html, Response};
 use axum::{
     http::StatusCode,
     response::IntoResponse,
@@ -21,6 +20,7 @@ use tiny_mailcatcher::{http, smtp};
 use tower_http::services::ServeDir;
 
 mod asset;
+mod html_template;
 mod options;
 mod templates;
 
@@ -78,24 +78,6 @@ async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
 
 async fn handle_error(_err: io::Error) -> impl IntoResponse {
     (StatusCode::INTERNAL_SERVER_ERROR, "Something went wrong...")
-}
-
-struct HtmlTemplate<T>(T);
-
-impl<T> IntoResponse for HtmlTemplate<T>
-where
-    T: Template,
-{
-    fn into_response(self) -> Response {
-        match self.0.render() {
-            Ok(html) => Html(html).into_response(),
-            Err(err) => (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                format!("Failed to render template. Error: {}", err),
-            )
-                .into_response(),
-        }
-    }
 }
 
 async fn index(State(state): State<Arc<AppState>>) -> impl IntoResponse {
