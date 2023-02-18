@@ -8,7 +8,6 @@ use axum::{
     routing::{get, get_service},
     Router,
 };
-use log::info;
 use std::error::Error;
 use std::io;
 use std::net::{Ipv4Addr, SocketAddr, TcpListener};
@@ -18,6 +17,7 @@ use structopt::StructOpt;
 use tiny_mailcatcher::repository::MessageRepository;
 use tiny_mailcatcher::{http, smtp};
 use tower_http::services::ServeDir;
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 mod asset;
 mod html_template;
@@ -30,7 +30,13 @@ struct AppState {
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
-    env_logger::init();
+    tracing_subscriber::registry()
+        .with(
+            tracing_subscriber::EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| "mailboar=debug".into()),
+        )
+        .with(tracing_subscriber::fmt::layer())
+        .init();
 
     let args: Options = Options::from_args();
 
@@ -40,17 +46,19 @@ async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
 
     let repository = Arc::new(Mutex::new(MessageRepository::new()));
 
-    info!("Mailboar is starting");
+    tracing::info!("Mailboar is starting");
 
     // Start API
     let api_address = format!("{}:{}", &args.ip, args.api_port);
     let api_listener = TcpListener::bind(&api_address).unwrap();
     let api_handle = tokio::spawn(http::run_http_server(api_listener, repository.clone()));
+    tracing::debug!("API listening on {}", api_address);
 
     // Start SMTP
     let smtp_address = format!("{}:{}", &args.ip, args.smtp_port);
-    let smtp_listener = TcpListener::bind(smtp_address).unwrap();
+    let smtp_listener = TcpListener::bind(&smtp_address).unwrap();
     let smtp_handle = tokio::spawn(smtp::run_smtp_server(smtp_listener, repository.clone()));
+    tracing::debug!("SMTP listening on {}", smtp_address);
 
     // Start Frontend
     let serve_dir = get_service(ServeDir::new("static")).handle_error(handle_error);
@@ -64,6 +72,8 @@ async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
 
     let ip = Ipv4Addr::from_str(&args.ip)?;
     let addr = SocketAddr::from((ip, args.http_port));
+    tracing::debug!("Frontend listening on {}", addr);
+
     #[allow(clippy::let_unit_value)]
     let res = axum::Server::bind(&addr)
         .serve(app.into_make_service())
