@@ -1,5 +1,8 @@
 # Mailboar
+
+[![GitHub Actions workflow status](https://github.com/aeyoll/mailboar/workflows/ci/badge.svg)](https://github.com/aeyoll/mailboar/actions)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
+[![Minimum rustc version](https://img.shields.io/badge/rustc-1.62.0+-lightgray.svg)](#rust-version-requirements)
 ![License](https://img.shields.io/github/license/aeyoll/toothpaste)
 
 Mailboar provides a web interface for [Tiny MailCatcher](https://github.com/pevdh/tiny-mailcatcher), a [MailCatcher](https://mailcatcher.me/) clone written in Rust.
@@ -23,8 +26,8 @@ cargo install mailboar
 Then, clone this repository, and build the static assets using [https://yarnpkg.com/](yarn). Node >= 14 is required.
 
 ```sh
-yarn # Install dependencies
-yarn run build # Build static assets
+yarn # Install dependencies
+yarn run build # Build static assets
 ```
 
 This will create a `static` repository with all the assets.
@@ -57,3 +60,8 @@ Auto-compile static assets:
 ```sh
 yarn run start
 ```
+
+Rust version requirements
+---
+
+1.62.0+

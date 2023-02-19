@@ -15,6 +15,6 @@ RUN cargo install --target x86_64-unknown-linux-musl --path .
 FROM scratch
 COPY --from=builder /usr/local/cargo/bin/mailboar .
 COPY --from=builder /usr/src/mailboar/static ./static
-ENV RUST_LOG=mailboar=info
+ENV RUST_LOG='mailboar=info'
 EXPOSE 1025 1080 8025
 CMD ["./mailboar", "--ip=0.0.0.0", "--smtp-port=1025", "--api-port=1080", "--http-port=8025"]

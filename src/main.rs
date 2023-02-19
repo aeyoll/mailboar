@@ -1,53 +1,84 @@
-use askama::Template;
-use log::info;
+use crate::html_template::HtmlTemplate;
+use crate::options::Options;
+use crate::templates::index::IndexTemplate;
+use axum::extract::State;
+use axum::{
+    http::StatusCode,
+    response::IntoResponse,
+    routing::{get, get_service},
+    Router,
+};
 use std::error::Error;
-use std::net::{IpAddr, TcpListener};
+use std::io;
+use std::net::{Ipv4Addr, SocketAddr, TcpListener};
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use structopt::StructOpt;
 use tiny_mailcatcher::repository::MessageRepository;
 use tiny_mailcatcher::{http, smtp};
-use warp::Filter;
-
-use crate::templates::index::IndexTemplate;
+use tower_http::services::ServeDir;
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 mod asset;
+mod html_template;
+mod options;
 mod templates;
+
+struct AppState {
+    api_url: String,
+}
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
-    env_logger::init();
+    tracing_subscriber::registry()
+        .with(
+            tracing_subscriber::EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| "mailboar=debug".into()),
+        )
+        .with(tracing_subscriber::fmt::layer())
+        .init();
 
     let args: Options = Options::from_args();
 
+    // Shared state
+    let api_url = args.api_url;
+    let state = Arc::new(AppState { api_url });
+
     let repository = Arc::new(Mutex::new(MessageRepository::new()));
 
-    info!("Mailboar is starting");
+    tracing::info!("Mailboar is starting");
 
     // Start API
     let api_address = format!("{}:{}", &args.ip, args.api_port);
     let api_listener = TcpListener::bind(&api_address).unwrap();
     let api_handle = tokio::spawn(http::run_http_server(api_listener, repository.clone()));
+    tracing::debug!("API listening on {}", api_address);
 
     // Start SMTP
     let smtp_address = format!("{}:{}", &args.ip, args.smtp_port);
-    let smtp_listener = TcpListener::bind(smtp_address).unwrap();
+    let smtp_listener = TcpListener::bind(&smtp_address).unwrap();
     let smtp_handle = tokio::spawn(smtp::run_smtp_server(smtp_listener, repository.clone()));
+    tracing::debug!("SMTP listening on {}", smtp_address);
 
     // Start Frontend
-    let api_url = args.api_url;
-    let index = warp::any().map(move || {
-        let template = IndexTemplate { api_url: &api_url };
-        warp::reply::html(template.render().unwrap())
-    });
-    let static_dir = warp::path("static")
-        .and(warp::fs::dir("static"))
-        .with(warp::compression::gzip());
+    let serve_dir = get_service(ServeDir::new("static")).handle_error(handle_error);
 
-    let routes = static_dir.or(index);
+    let app = Router::new()
+        .route("/", get(index))
+        .nest_service("/static", serve_dir.clone())
+        .fallback_service(serve_dir)
+        .fallback(get(index))
+        .with_state(state);
 
-    let addr = IpAddr::from_str(&args.ip)?;
-    let res = warp::serve(routes).run((addr, args.http_port)).await;
+    let ip = Ipv4Addr::from_str(&args.ip)?;
+    let addr = SocketAddr::from((ip, args.http_port));
+    tracing::debug!("Frontend listening on {}", addr);
+
+    #[allow(clippy::let_unit_value)]
+    let res = axum::Server::bind(&addr)
+        .serve(app.into_make_service())
+        .await
+        .unwrap();
     let http_handle = tokio::spawn(async move { res });
 
     let (api_res, smtp_res, http_res) = tokio::try_join!(api_handle, smtp_handle, http_handle)?;
@@ -55,21 +86,13 @@ async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
     api_res.and(smtp_res).and(Ok(http_res))
 }
 
-#[derive(Debug, StructOpt)]
-#[structopt(name = "mailboar", about)]
-struct Options {
-    #[structopt(long, default_value = "127.0.0.1")]
-    ip: String,
+async fn handle_error(_err: io::Error) -> impl IntoResponse {
+    (StatusCode::INTERNAL_SERVER_ERROR, "Something went wrong...")
+}
 
-    #[structopt(long, default_value = "http://127.0.0.1:1080")]
-    api_url: String,
+async fn index(State(state): State<Arc<AppState>>) -> impl IntoResponse {
+    let api_url = state.api_url.clone();
+    let template = IndexTemplate { api_url };
 
-    #[structopt(long, name = "smtp-port", default_value = "1025")]
-    smtp_port: u16,
-
-    #[structopt(long, name = "api-port", default_value = "1080")]
-    api_port: u16,
-
-    #[structopt(long, name = "http-port", default_value = "8025")]
-    http_port: u16,
+    HtmlTemplate(template)
 }
