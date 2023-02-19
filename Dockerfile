@@ -1,20 +1,17 @@
-# Build Stage
-FROM rust:latest AS builder
-WORKDIR /usr/src/
-RUN rustup target add x86_64-unknown-linux-musl
+# Compile
+FROM    rust:alpine3.16 AS compiler
+RUN     apk add -q --update-cache --no-cache build-base openssl-dev git
+WORKDIR /mailboar
+COPY    . .
+RUN     set -eux; \
+        cargo build --release --config net.git-fetch-with-cli=true
 
-RUN USER=root cargo new mailboar
-WORKDIR /usr/src/mailboar
-COPY Cargo.toml Cargo.lock ./
-COPY static ./static
-COPY src ./src
-COPY templates ./templates
-RUN cargo install --target x86_64-unknown-linux-musl --path .
+# Run
+FROM    alpine:3.16
+ENV     RUST_LOG='mailboar=info'
+COPY    --from=compiler /mailboar/target/release/mailboar .
+COPY    --from=compiler /mailboar/static ./static
 
-# Bundle Stage
-FROM scratch
-COPY --from=builder /usr/local/cargo/bin/mailboar .
-COPY --from=builder /usr/src/mailboar/static ./static
-ENV RUST_LOG='mailboar=info'
-EXPOSE 1025 1080 8025
-CMD ["./mailboar", "--ip=0.0.0.0", "--smtp-port=1025", "--api-port=1080", "--http-port=8025"]
+EXPOSE  1025 1080 8025
+
+CMD     ["./mailboar", "--ip=0.0.0.0", "--smtp-port=1025", "--api-port=1080", "--http-port=8025"]
