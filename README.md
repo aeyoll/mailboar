@@ -1,4 +1,5 @@
 # Mailboar
+
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 ![License](https://img.shields.io/github/license/aeyoll/toothpaste)
 
@@ -23,8 +24,8 @@ cargo install mailboar
 Then, clone this repository, and build the static assets using [https://yarnpkg.com/](yarn). Node >= 14 is required.
 
 ```sh
-yarn # Install dependencies
-yarn run build # Build static assets
+yarn # Install dependencies
+yarn run build # Build static assets
 ```
 
 This will create a `static` repository with all the assets.
