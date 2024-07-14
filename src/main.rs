@@ -2,14 +2,14 @@ use crate::html_template::HtmlTemplate;
 use crate::options::Options;
 use crate::templates::index::IndexTemplate;
 use axum::extract::State;
+use axum::handler::HandlerWithoutStateExt;
 use axum::{
     http::StatusCode,
     response::IntoResponse,
-    routing::{get, get_service},
+    routing::get,
     Router,
 };
 use std::error::Error;
-use std::io;
 use std::net::{Ipv4Addr, SocketAddr, TcpListener};
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
@@ -60,8 +60,9 @@ async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
     let smtp_handle = tokio::spawn(smtp::run_smtp_server(smtp_listener, repository.clone()));
     tracing::debug!("SMTP listening on {}", smtp_address);
 
-    // Start Frontend
-    let serve_dir = get_service(ServeDir::new("static")).handle_error(handle_error);
+    // Start frontend
+    let service = handle_404.into_service();
+    let serve_dir = ServeDir::new("static").not_found_service(service);
 
     let app = Router::new()
         .route("/", get(index))
@@ -74,20 +75,22 @@ async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
     let addr = SocketAddr::from((ip, args.http_port));
     tracing::debug!("Frontend listening on {}", addr);
 
+    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     #[allow(clippy::let_unit_value)]
-    let res = axum::Server::bind(&addr)
-        .serve(app.into_make_service())
+    let res = axum::serve(listener, app.into_make_service())
         .await
         .unwrap();
     let http_handle = tokio::spawn(async move { res });
 
+    // Wait for all tasks to finish
     let (api_res, smtp_res, http_res) = tokio::try_join!(api_handle, smtp_handle, http_handle)?;
 
     api_res.and(smtp_res).and(Ok(http_res))
 }
 
-async fn handle_error(_err: io::Error) -> impl IntoResponse {
-    (StatusCode::INTERNAL_SERVER_ERROR, "Something went wrong...")
+// Start Frontend
+async fn handle_404() -> (StatusCode, &'static str) {
+    (StatusCode::NOT_FOUND, "Not found")
 }
 
 async fn index(State(state): State<Arc<AppState>>) -> impl IntoResponse {
