@@ -36,7 +36,7 @@ export default {
     let content = this.parsedMessage.html;
 
     if (content.indexOf('</body>') === -1) {
-      content = '<body>' + content + '</body>';
+      content = '<body style="margin: 0; padding: 0;">' + content + '</body>';
     }
 
     htmlIframe.contentWindow.document.open();
@@ -47,7 +47,7 @@ export default {
     htmlIframe.contentWindow.document.querySelectorAll('img').forEach(img => {
       if (/^cid:/.test(img.src)) {
         // replace with inline attachment
-        const cid = img.src.substr(4).trim();
+        const cid = img.src.substring(4).trim();
         const attachment = this.parsedMessage.attachments.find(attachment => attachment.contentId && attachment.contentId === `<${cid}>`);
 
         if (attachment) {
@@ -57,8 +57,9 @@ export default {
     });
 
     const sendPostMessage = () => {
-      if (height !== htmlIframe.contentWindow.document.querySelector('body').offsetHeight) {
-        var height = htmlIframe.contentWindow.document.querySelector('body').offsetHeight;
+      const height = htmlIframe.contentWindow.document.querySelector('body').offsetHeight;
+
+      if (this.htmlIframeHeight !== height) {
         this.htmlIframeHeight = height;
       }
     };
