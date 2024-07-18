@@ -57,7 +57,7 @@ async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
 
     // Start frontend
     let service = handle_404.into_service();
-    let serve_dir = ServeDir::new("static").not_found_service(service);
+    let serve_dir = ServeDir::new("../../static").not_found_service(service);
 
     let app = Router::new()
         .route("/", get(index))
