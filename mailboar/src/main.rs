@@ -10,6 +10,7 @@ use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use structopt::StructOpt;
 use tiny_mailcatcher::repository::MessageRepository;
+use tiny_mailcatcher::sse_clients::SseClients;
 use tiny_mailcatcher::{http, smtp};
 use tower_http::services::ServeDir;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
@@ -40,24 +41,33 @@ async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
     let state = Arc::new(AppState { api_url });
 
     let repository = Arc::new(Mutex::new(MessageRepository::new()));
+    let sse_clients = Arc::new(SseClients::new());
 
     tracing::info!("Mailboar is starting");
 
     // Start API
     let api_address = format!("{}:{}", &args.ip, args.api_port);
     let api_listener = TcpListener::bind(&api_address).unwrap();
-    let api_handle = tokio::spawn(http::run_http_server(api_listener, repository.clone()));
+    let api_handle = tokio::spawn(http::run_http_server(
+        api_listener,
+        repository.clone(),
+        sse_clients.clone(),
+    ));
     tracing::debug!("API listening on {}", api_address);
 
     // Start SMTP
     let smtp_address = format!("{}:{}", &args.ip, args.smtp_port);
     let smtp_listener = TcpListener::bind(&smtp_address).unwrap();
-    let smtp_handle = tokio::spawn(smtp::run_smtp_server(smtp_listener, repository.clone()));
+    let smtp_handle = tokio::spawn(smtp::run_smtp_server(
+        smtp_listener,
+        repository.clone(),
+        sse_clients.clone(),
+    ));
     tracing::debug!("SMTP listening on {}", smtp_address);
 
     // Start frontend
     let service = handle_404.into_service();
-    let serve_dir = ServeDir::new("../../static").not_found_service(service);
+    let serve_dir = ServeDir::new("../static").not_found_service(service);
 
     let app = Router::new()
         .route("/", get(index))

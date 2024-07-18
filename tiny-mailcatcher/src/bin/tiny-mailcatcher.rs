@@ -4,6 +4,7 @@ use std::net::TcpListener;
 use std::sync::{Arc, Mutex};
 use structopt::StructOpt;
 use tiny_mailcatcher::repository::MessageRepository;
+use tiny_mailcatcher::sse_clients::SseClients;
 use tiny_mailcatcher::{http, smtp};
 
 #[tokio::main(flavor = "current_thread")]
@@ -13,15 +14,24 @@ async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
     let args: Options = Options::from_args();
 
     let repository = Arc::new(Mutex::new(MessageRepository::new()));
+    let sse_clients = Arc::new(SseClients::new());
 
     info!("Tiny MailCatcher is starting");
     let http_addr = format!("{}:{}", &args.ip, args.http_port);
     let http_listener = TcpListener::bind(http_addr).unwrap();
-    let http_handle = tokio::spawn(http::run_http_server(http_listener, repository.clone()));
+    let http_handle = tokio::spawn(http::run_http_server(
+        http_listener,
+        repository.clone(),
+        sse_clients.clone(),
+    ));
 
     let smtp_addr = format!("{}:{}", &args.ip, args.smtp_port);
     let smtp_listener = TcpListener::bind(smtp_addr).unwrap();
-    let smtp_handle = tokio::spawn(smtp::run_smtp_server(smtp_listener, repository.clone()));
+    let smtp_handle = tokio::spawn(smtp::run_smtp_server(
+        smtp_listener,
+        repository.clone(),
+        sse_clients.clone(),
+    ));
 
     let (http_res, smtp_res) = tokio::try_join!(http_handle, smtp_handle)?;
 

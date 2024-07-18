@@ -1,14 +1,16 @@
+use serde::Serialize;
 use std::collections::HashMap;
 
 use chrono::{DateTime, Utc};
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize, Clone)]
 pub struct Message {
     pub id: Option<usize>,
     pub size: usize,
     pub subject: Option<String>,
     pub sender: Option<String>,
     pub recipients: Vec<String>,
+    #[serde(with = "chrono::serde::ts_seconds")]
     pub created_at: DateTime<Utc>,
     pub typ: String,
     pub parts: Vec<MessagePart>,
@@ -29,7 +31,7 @@ impl Message {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Serialize)]
 pub struct MessagePart {
     pub cid: String,
     pub typ: String,

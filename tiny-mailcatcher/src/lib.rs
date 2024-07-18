@@ -2,6 +2,8 @@
 #![allow(clippy::enum_variant_names)]
 
 pub mod email;
+pub mod event;
 pub mod http;
 pub mod repository;
 pub mod smtp;
+pub mod sse_clients;

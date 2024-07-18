@@ -1,5 +1,6 @@
 use crate::email::parse_message;
 use crate::repository::MessageRepository;
+use crate::sse_clients::SseClients;
 use log::{info, warn};
 use std::net::TcpListener as StdTcpListener;
 use std::sync::{Arc, Mutex};
@@ -11,6 +12,7 @@ type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>
 pub async fn run_smtp_server(
     tcp_listener: StdTcpListener,
     repository: Arc<Mutex<MessageRepository>>,
+    sse_clients: Arc<SseClients>,
 ) -> Result<()> {
     info!(
         "Starting SMTP server on {}",
@@ -23,9 +25,11 @@ pub async fn run_smtp_server(
     loop {
         let (socket, remote_ip) = listener.accept().await?;
         let session_repository = Arc::clone(&repository);
+        let session_sse_clients = Arc::clone(&sse_clients);
 
         tokio::spawn(async move {
-            let server_impl = SmtpServerImplementation::new(session_repository);
+            let server_impl =
+                SmtpServerImplementation::new(session_repository, session_sse_clients);
             let mut protocol = SmtpProtocol::new(socket, server_impl);
 
             match protocol.execute().await {
@@ -239,14 +243,16 @@ struct SmtpServerImplementation {
     sender: Option<String>,
     recipients: Vec<String>,
     repository: Arc<Mutex<MessageRepository>>,
+    sse_clients: Arc<SseClients>,
 }
 
 impl SmtpServerImplementation {
-    fn new(repository: Arc<Mutex<MessageRepository>>) -> Self {
+    fn new(repository: Arc<Mutex<MessageRepository>>, sse_clients: Arc<SseClients>) -> Self {
         SmtpServerImplementation {
             sender: None,
             recipients: Vec::new(),
             repository,
+            sse_clients,
         }
     }
 
@@ -285,7 +291,11 @@ impl SmtpServerImplementation {
             buf.len(),
         );
 
-        self.repository.lock().unwrap().persist(message);
+        self.repository.lock().unwrap().persist(message.clone());
+
+        // Send SSE
+        let sse_message = serde_json::to_string(&message).unwrap();
+        let _ = self.sse_clients.send(sse_message);
 
         Ok(())
     }

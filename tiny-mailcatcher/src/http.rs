@@ -7,7 +7,9 @@ use routerify::{Middleware, Router, RouterService};
 use serde::Serialize;
 use std::io;
 use std::net::TcpListener;
+use std::pin::Pin;
 use std::sync::{Arc, Mutex};
+use futures::Stream;
 
 async fn add_cors_headers(mut res: Response<Body>) -> Result<Response<Body>, io::Error> {
     let headers = res.headers_mut();
@@ -32,12 +34,22 @@ async fn add_cors_headers(mut res: Response<Body>) -> Result<Response<Body>, io:
     Ok(res)
 }
 
+use crate::event::Event;
+use crate::sse_clients::SseClients;
+
 struct State {
     repository: Arc<Mutex<MessageRepository>>,
+    sse_clients: Arc<SseClients>,
 }
 
-fn router(repository: Arc<Mutex<MessageRepository>>) -> Router<Body, io::Error> {
-    let state = State { repository };
+fn router(
+    repository: Arc<Mutex<MessageRepository>>,
+    sse_clients: Arc<SseClients>,
+) -> Router<Body, io::Error> {
+    let state = State {
+        repository,
+        sse_clients,
+    };
 
     Router::builder()
         .middleware(Middleware::post(add_cors_headers))
@@ -50,6 +62,7 @@ fn router(repository: Arc<Mutex<MessageRepository>>) -> Router<Body, io::Error> 
         .get("/messages/:id.plain", get_message_plain)
         .get("/messages/:id/parts/:cid", get_message_part)
         .get("/messages", get_messages)
+        .get("/messages/events", sse_handler)
         .delete("/messages", delete_messages)
         .options("/*", options_handler)
         .any(handler_404)
@@ -60,13 +73,14 @@ fn router(repository: Arc<Mutex<MessageRepository>>) -> Router<Body, io::Error> 
 pub async fn run_http_server(
     tcp_listener: TcpListener,
     repository: Arc<Mutex<MessageRepository>>,
+    sse_clients: Arc<SseClients>,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     info!(
         "Starting HTTP server on {}",
         tcp_listener.local_addr().unwrap()
     );
 
-    let router = router(repository);
+    let router = router(repository, sse_clients);
     let service = RouterService::new(router).unwrap();
 
     let server = Server::from_tcp(tcp_listener).unwrap().serve(service);
@@ -141,6 +155,36 @@ struct GetMessageAttachment {
     pub filename: String,
     pub size: usize,
     pub href: String,
+}
+
+async fn sse_handler(req: Request<Body>) -> Result<Response<Body>, io::Error> {
+    let state = req.data::<State>().unwrap();
+    let mut rx = state.sse_clients.tx.subscribe();
+
+    let stream = async_stream::stream! {
+        loop {
+            match rx.recv().await {
+                Ok(msg) => {
+                    let event = Event::new()
+                        .event_type("message")
+                        .data(&msg)
+                        .to_string();
+                    yield Ok::<_, io::Error>(event.into_bytes());
+                },
+                Err(_) => break,
+            }
+        }
+    };
+    let stream: Pin<Box<dyn Stream<Item = Result<Vec<u8>, io::Error>> + Send>> = Box::pin(stream);
+
+    let response = Response::builder()
+        .header("Content-Type", "text/event-stream")
+        .header("Cache-Control", "no-cache")
+        .header("Connection", "keep-alive")
+        .body(Body::wrap_stream(stream))
+        .unwrap();
+
+    Ok(response)
 }
 
 async fn get_message_json(req: Request<Body>) -> Result<Response<Body>, io::Error> {
