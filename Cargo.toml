@@ -1,19 +1,9 @@
-[package]
-name = "mailboar"
-version = "0.2.0"
-edition = "2021"
-description = "A web interface for Tiny MailCatcher, a MailCatcher clone"
-license = "MIT"
+[workspace]
+members = [
+    "mailboar",
+    "tiny-mailcatcher",
+]
+resolver = "2"
 
-[dependencies]
-askama = "0.12.1"
-axum = "0.7.5"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1"
-structopt = { version = "0.3", default-features = false }
-tiny-mailcatcher = "0.9.3"
-tokio = { version = "1.0", features = ["full"] }
-tower = { version = "0.4", features = ["util"] }
-tower-http = { version = "0.5.2", features = ["fs", "trace"] }
-tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+[profile.release]
+lto = true
