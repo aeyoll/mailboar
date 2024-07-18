@@ -49,15 +49,40 @@ export default {
     apiUrl: state => state.apiUrl,
   }),
   mounted: function () {
-    this
-      .axios
-      .get(`${this.apiUrl}/messages`)
-      .then((response) => {
-        const messages = response.data;
-        this.messages = messages.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      });
+    this.fetchMessages();
+    this.subscribeToSSE();
+  },
+  beforeUnmount: function () {
+    this.unsubscribeFromSSE();
   },
   methods: {
+    fetchMessages() {
+      this.axios
+        .get(`${this.apiUrl}/messages`)
+        .then((response) => {
+          const messages = response.data;
+          this.messages = messages.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        });
+    },
+    subscribeToSSE() {
+      this.eventSource = new EventSource(`${this.apiUrl}/events`);
+      this.eventSource.onmessage = (event) => {
+        // Refresh the messages list when a new message is received
+        this.fetchMessages();
+      };
+      this.eventSource.onerror = (error) => {
+        console.error('SSE Error:', error);
+        this.unsubscribeFromSSE();
+        // Attempt to reconnect after 5 seconds
+        setTimeout(() => this.subscribeToSSE(), 5000);
+      };
+    },
+    unsubscribeFromSSE() {
+      if (this.eventSource) {
+        this.eventSource.close();
+        this.eventSource = null;
+      }
+    },
     deleteAllMessages() {
       this
         .axios
