@@ -1,11 +1,11 @@
 {
   "scripts": {
-    "build": "webpack --progress --config assets/config/webpack.prod.js",
+    "build": "../node_modules/.bin/webpack --progress --config assets/config/webpack.prod.js",
     "lint": "npm run -s lint:scripts && npm run -s lint:styles",
-    "lint:scripts": "eslint assets/script/**/**/*.{js,vue}",
-    "lint:styles": "stylelint \"assets/styles/**/*.{css,sass,scss}\"",
-    "rmdist": "rimraf dist",
-    "start": "webpack --watch --config assets/config/webpack.dev.js"
+    "lint:scripts": "../node_modules/.bin/eslint assets/script/**/**/*.{js,vue}",
+    "lint:styles": "../node_modules/.bin/stylelint \\\"assets/styles/**/*.{css,sass,scss}\\\"",
+    "rmdist": "../node_modules/.bin/rimraf dist",
+    "start": "../node_modules/.bin/webpack --watch --config assets/config/webpack.dev.js"
   },
   "devDependencies": {
     "@swc/core": "^1.6.13",
