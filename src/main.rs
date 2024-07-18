@@ -3,12 +3,7 @@ use crate::options::Options;
 use crate::templates::index::IndexTemplate;
 use axum::extract::State;
 use axum::handler::HandlerWithoutStateExt;
-use axum::{
-    http::StatusCode,
-    response::IntoResponse,
-    routing::get,
-    Router,
-};
+use axum::{http::StatusCode, response::IntoResponse, routing::get, Router};
 use std::error::Error;
 use std::net::{Ipv4Addr, SocketAddr, TcpListener};
 use std::str::FromStr;
