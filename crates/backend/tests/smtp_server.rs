@@ -2,9 +2,9 @@ use lettre::{AsyncSmtpTransport, AsyncTransport, Message as EmailMessage, Tokio1
 use std::net::{SocketAddr, TcpListener};
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
-use tiny_mailcatcher::repository::MessageRepository;
-use tiny_mailcatcher::smtp::run_smtp_server;
-use tiny_mailcatcher::sse_clients::SseClients;
+use mailboar_backend::repository::MessageRepository;
+use mailboar_backend::smtp::run_smtp_server;
+use mailboar_backend::sse_clients::SseClients;
 use tokio::task::JoinHandle;
 
 fn launch_test_smtp_server(

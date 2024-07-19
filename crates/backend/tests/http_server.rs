@@ -3,9 +3,9 @@ use reqwest::{Method, Response};
 use std::net::SocketAddr;
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
-use tiny_mailcatcher::http::run_http_server;
-use tiny_mailcatcher::repository::{Message, MessageRepository};
-use tiny_mailcatcher::sse_clients::SseClients;
+use mailboar_backend::http::run_http_server;
+use mailboar_backend::repository::{Message, MessageRepository};
+use mailboar_backend::sse_clients::SseClients;
 use tokio::task::JoinHandle;
 
 fn create_repository_with_messages(messages: Vec<Message>) -> Arc<Mutex<MessageRepository>> {
