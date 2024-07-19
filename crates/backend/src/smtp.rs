@@ -283,7 +283,7 @@ impl SmtpServerImplementation {
         if message.is_err() {
             return Err(Box::new(message.err().unwrap()));
         }
-        let message = message.unwrap();
+        let mut message = message.unwrap();
 
         tracing::info!(
             "Received message from {} ({} bytes)",
@@ -291,7 +291,7 @@ impl SmtpServerImplementation {
             buf.len(),
         );
 
-        self.repository.lock().unwrap().persist(message.clone());
+        message = self.repository.lock().unwrap().persist(message);
 
         // Send SSE
         let sse_message = serde_json::to_string(&message).unwrap();

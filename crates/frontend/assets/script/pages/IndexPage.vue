@@ -18,7 +18,7 @@
     </div>
 
     <div class="page-body">
-      <v-message-list v-if="messages.length > 0" :messages="messages" />
+      <v-message-list v-if="sortedMessages.length > 0" :messages="sortedMessages" />
       <div v-else class="container-xl d-flex flex-column justify-content-center">
         <div class="empty">
           <div class="empty-img">
@@ -47,6 +47,9 @@ export default {
   },
   computed: mapState({
     apiUrl: state => state.apiUrl,
+    sortedMessages: function () {
+      return this.messages.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    },
   }),
   mounted: function () {
     this.fetchMessages();
@@ -56,19 +59,21 @@ export default {
     this.unsubscribeFromSSE();
   },
   methods: {
+    addMessage(message) {
+      this.messages.push(message);
+    },
     fetchMessages() {
       this.axios
         .get(`${this.apiUrl}/messages`)
         .then((response) => {
-          const messages = response.data;
-          this.messages = messages.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+          this.messages = response.data;
         });
     },
     subscribeToSSE() {
       this.eventSource = new EventSource(`${this.apiUrl}/events`);
       this.eventSource.onmessage = (event) => {
-        // Refresh the messages list when a new message is received
-        this.fetchMessages();
+        const message = JSON.parse(event.data);
+        this.addMessage(message);
       };
       this.eventSource.onerror = (error) => {
         console.error('SSE Error:', error);

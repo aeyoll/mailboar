@@ -54,11 +54,12 @@ impl MessageRepository {
         }
     }
 
-    pub fn persist(&mut self, mut message: Message) {
+    pub fn persist(&mut self, mut message: Message) -> Message {
         let id = self.last_insert_id + 1;
         self.last_insert_id += 1;
         message.id = Some(id);
-        self.messages.insert(id, message);
+        self.messages.insert(id, message.clone());
+        message
     }
 
     pub fn find_all(&self) -> Vec<&Message> {
