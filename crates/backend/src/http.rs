@@ -7,7 +7,6 @@ use axum::{
     Json, Router,
 };
 use futures::stream::Stream;
-use log::info;
 use serde::Serialize;
 use std::io;
 use std::sync::{Arc, Mutex};
@@ -46,7 +45,7 @@ pub async fn run_http_server(
     repository: Arc<Mutex<MessageRepository>>,
     sse_clients: Arc<SseClients>,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    info!("Starting HTTP server on {}", listener.local_addr().unwrap());
+    tracing::info!("Starting HTTP server on {}", listener.local_addr().unwrap());
 
     let app = router(repository, sse_clients).layer(CorsLayer::permissive());
 

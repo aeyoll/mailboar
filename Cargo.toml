@@ -28,6 +28,8 @@ resolver = "2"
 mailboar_backend = { path = "crates/backend" }
 mailboar_frontend = { path = "crates/frontend" }
 axum = "0.7.5"
+env_logger = { version = "0.11.3", default-features = false }
+log = "0.4"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1"
 tokio = { version = "1.0", features = ["full"] }
@@ -37,9 +39,11 @@ tracing = "0.1.40"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [dependencies]
-axum = { workspace = true }
 mailboar_backend = { workspace = true }
 mailboar_frontend = { workspace = true }
+axum = { workspace = true }
+env_logger = { workspace = true }
+log = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 tokio = { workspace = true }

@@ -50,7 +50,6 @@ async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
         repository.clone(),
         sse_clients.clone(),
     ));
-    tracing::debug!("API listening on {}", api_address);
 
     // Start SMTP
     let smtp_address = format!("{}:{}", &args.ip, args.smtp_port);
@@ -60,7 +59,6 @@ async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
         repository.clone(),
         sse_clients.clone(),
     ));
-    tracing::debug!("SMTP listening on {}", smtp_address);
 
     // Start frontend
     let service = handle_404.into_service();
@@ -75,7 +73,7 @@ async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
 
     let ip = Ipv4Addr::from_str(&args.ip)?;
     let addr = SocketAddr::from((ip, args.http_port));
-    tracing::debug!("Frontend listening on {}", addr);
+    tracing::info!("Starting Frontend HTTP server on {}", addr);
 
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     #[allow(clippy::let_unit_value)]

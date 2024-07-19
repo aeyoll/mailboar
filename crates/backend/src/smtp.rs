@@ -1,7 +1,6 @@
 use crate::email::parse_message;
 use crate::repository::MessageRepository;
 use crate::sse_clients::SseClients;
-use log::{info, warn};
 use std::net::TcpListener as StdTcpListener;
 use std::sync::{Arc, Mutex};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
@@ -14,7 +13,7 @@ pub async fn run_smtp_server(
     repository: Arc<Mutex<MessageRepository>>,
     sse_clients: Arc<SseClients>,
 ) -> Result<()> {
-    info!(
+    tracing::info!(
         "Starting SMTP server on {}",
         tcp_listener.local_addr().unwrap()
     );
@@ -35,9 +34,10 @@ pub async fn run_smtp_server(
             match protocol.execute().await {
                 Ok(_) => {}
                 Err(e) => {
-                    warn!(
+                    tracing::warn!(
                         "An error occurred while executing the SMTP protocol with {}: {}",
-                        remote_ip, e
+                        remote_ip,
+                        e
                     );
                 }
             };
@@ -285,7 +285,7 @@ impl SmtpServerImplementation {
         }
         let message = message.unwrap();
 
-        info!(
+        tracing::info!(
             "Received message from {} ({} bytes)",
             sender.as_deref().unwrap_or("unknown sender"),
             buf.len(),
