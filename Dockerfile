@@ -8,9 +8,8 @@ RUN     set -eux; \
 
 # Run
 FROM    alpine:3.16
-ENV     RUST_LOG='mailboar=info'
 COPY    --from=compiler /mailboar/target/release/mailboar .
-COPY    --from=compiler /mailboar/static ./static
+COPY    --from=compiler /mailboar/crates/frontend/static ./static
 
 EXPOSE  1025 1080 8025
 
