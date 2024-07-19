@@ -3,7 +3,7 @@ use std::fs;
 /// Read an asset manifest and return the correct filename from this manifest
 pub fn get_asset_path(path: &str) -> String {
     let static_dir: &str = "static";
-    let manifest_path = "mailboar/static";
+    let manifest_path = "crates/frontend/static";
     let manifest_file_name: &str = "assets-manifest.json";
 
     let manifest = format!("{}/{}", manifest_path, manifest_file_name);

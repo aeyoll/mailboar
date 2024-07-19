@@ -1,24 +1,21 @@
-use crate::html_template::HtmlTemplate;
 use crate::options::Options;
-use crate::templates::index::IndexTemplate;
 use axum::extract::State;
 use axum::handler::HandlerWithoutStateExt;
 use axum::{http::StatusCode, response::IntoResponse, routing::get, Router};
+use mailboar_backend::repository::MessageRepository;
+use mailboar_backend::sse_clients::SseClients;
+use mailboar_backend::{http, smtp};
+use mailboar_frontend::html_template::HtmlTemplate;
+use mailboar_frontend::templates::index::IndexTemplate;
 use std::error::Error;
 use std::net::{Ipv4Addr, SocketAddr, TcpListener};
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use structopt::StructOpt;
-use tiny_mailcatcher::repository::MessageRepository;
-use tiny_mailcatcher::sse_clients::SseClients;
-use tiny_mailcatcher::{http, smtp};
 use tower_http::services::ServeDir;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-mod asset;
-mod html_template;
 mod options;
-mod templates;
 
 struct AppState {
     api_url: String,
@@ -67,7 +64,7 @@ async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
 
     // Start frontend
     let service = handle_404.into_service();
-    let serve_dir = ServeDir::new("mailboar/static").not_found_service(service);
+    let serve_dir = ServeDir::new("crates/frontend/static").not_found_service(service);
 
     let app = Router::new()
         .route("/", get(index))
