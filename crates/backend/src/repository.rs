@@ -10,7 +10,6 @@ pub struct Message {
     pub subject: Option<String>,
     pub sender: Option<String>,
     pub recipients: Vec<String>,
-    #[serde(with = "chrono::serde::ts_seconds")]
     pub created_at: DateTime<Utc>,
     pub typ: String,
     pub parts: Vec<MessagePart>,
