@@ -1,11 +1,11 @@
 use chrono::{TimeZone, Utc};
+use mailboar_backend::http::run_http_server;
+use mailboar_backend::repository::{Message, MessageRepository};
+use mailboar_backend::sse_clients::SseClients;
 use reqwest::{Method, Response};
 use std::net::SocketAddr;
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
-use mailboar_backend::http::run_http_server;
-use mailboar_backend::repository::{Message, MessageRepository};
-use mailboar_backend::sse_clients::SseClients;
 use tokio::task::JoinHandle;
 
 fn create_repository_with_messages(messages: Vec<Message>) -> Arc<Mutex<MessageRepository>> {

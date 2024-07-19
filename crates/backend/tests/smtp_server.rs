@@ -1,10 +1,10 @@
 use lettre::{AsyncSmtpTransport, AsyncTransport, Message as EmailMessage, Tokio1Executor};
-use std::net::{SocketAddr, TcpListener};
-use std::str::FromStr;
-use std::sync::{Arc, Mutex};
 use mailboar_backend::repository::MessageRepository;
 use mailboar_backend::smtp::run_smtp_server;
 use mailboar_backend::sse_clients::SseClients;
+use std::net::{SocketAddr, TcpListener};
+use std::str::FromStr;
+use std::sync::{Arc, Mutex};
 use tokio::task::JoinHandle;
 
 fn launch_test_smtp_server(
