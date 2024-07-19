@@ -4,22 +4,32 @@ use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use tiny_mailcatcher::repository::MessageRepository;
 use tiny_mailcatcher::smtp::run_smtp_server;
+use tiny_mailcatcher::sse_clients::SseClients;
 use tokio::task::JoinHandle;
 
-fn launch_test_smtp_server(repository: Arc<Mutex<MessageRepository>>, port: u16) -> JoinHandle<()> {
+fn launch_test_smtp_server(
+    repository: Arc<Mutex<MessageRepository>>,
+    sse_clients: Arc<SseClients>,
+    port: u16,
+) -> JoinHandle<()> {
     let addr = SocketAddr::from_str(format!("127.0.0.1:{}", port).as_str()).unwrap();
     let tcp_listener = TcpListener::bind(addr).unwrap();
 
     tokio::spawn(async move {
-        run_smtp_server(tcp_listener, repository.clone())
+        run_smtp_server(tcp_listener, repository.clone(), sse_clients.clone())
             .await
             .unwrap()
     })
 }
 
-async fn send_mail(repository: Arc<Mutex<MessageRepository>>, sender: &str, recipient: &str) {
+async fn send_mail(
+    repository: Arc<Mutex<MessageRepository>>,
+    sse_clients: Arc<SseClients>,
+    sender: &str,
+    recipient: &str,
+) {
     let port = 62044;
-    let server = launch_test_smtp_server(repository, port);
+    let _server = launch_test_smtp_server(repository, sse_clients, port).await;
 
     let email = EmailMessage::builder()
         .from(sender.parse().unwrap())
@@ -34,15 +44,18 @@ async fn send_mail(repository: Arc<Mutex<MessageRepository>>, sender: &str, reci
 
     mailer.send(email).await.unwrap();
 
-    server.abort();
+    // TODO: abort the server?
+    // server.abort();
 }
 
 #[tokio::test]
 async fn test_smtp_server_is_reachable() {
     let repository = Arc::new(Mutex::new(MessageRepository::new()));
+    let sse_clients = Arc::new(SseClients::new());
 
     send_mail(
         repository.clone(),
+        sse_clients.clone(),
         "test@example.com",
         "recipient@example.com",
     )

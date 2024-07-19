@@ -47,7 +47,7 @@ async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
 
     // Start API
     let api_address = format!("{}:{}", &args.ip, args.api_port);
-    let api_listener = TcpListener::bind(&api_address).unwrap();
+    let api_listener = tokio::net::TcpListener::bind(&api_address).await.unwrap();
     let api_handle = tokio::spawn(http::run_http_server(
         api_listener,
         repository.clone(),

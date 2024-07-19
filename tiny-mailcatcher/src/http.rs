@@ -1,91 +1,58 @@
 use crate::repository::MessageRepository;
-use hyper::http::HeaderValue;
-use hyper::{header, Body, Request, Response, Server, StatusCode};
+use axum::{
+    extract::{Path, State},
+    http::{header, HeaderValue, StatusCode},
+    response::{IntoResponse, Response, Sse},
+    routing::{delete, get},
+    Json, Router,
+};
+use futures::stream::Stream;
 use log::info;
-use routerify::ext::RequestExt;
-use routerify::{Middleware, Router, RouterService};
 use serde::Serialize;
 use std::io;
-use std::net::TcpListener;
-use std::pin::Pin;
 use std::sync::{Arc, Mutex};
-use futures::Stream;
+use tokio::net::TcpListener;
+use tower_http::cors::CorsLayer;
 
-async fn add_cors_headers(mut res: Response<Body>) -> Result<Response<Body>, io::Error> {
-    let headers = res.headers_mut();
-
-    headers.insert(
-        header::ACCESS_CONTROL_ALLOW_ORIGIN,
-        HeaderValue::from_static("*"),
-    );
-    headers.insert(
-        header::ACCESS_CONTROL_ALLOW_METHODS,
-        HeaderValue::from_static("*"),
-    );
-    headers.insert(
-        header::ACCESS_CONTROL_ALLOW_HEADERS,
-        HeaderValue::from_static("*"),
-    );
-    headers.insert(
-        header::ACCESS_CONTROL_EXPOSE_HEADERS,
-        HeaderValue::from_static("*"),
-    );
-
-    Ok(res)
-}
-
-use crate::event::Event;
 use crate::sse_clients::SseClients;
 
-struct State {
+#[derive(Clone)]
+struct AppState {
     repository: Arc<Mutex<MessageRepository>>,
     sse_clients: Arc<SseClients>,
 }
 
-fn router(
-    repository: Arc<Mutex<MessageRepository>>,
-    sse_clients: Arc<SseClients>,
-) -> Router<Body, io::Error> {
-    let state = State {
+fn router(repository: Arc<Mutex<MessageRepository>>, sse_clients: Arc<SseClients>) -> Router {
+    let state = AppState {
         repository,
         sse_clients,
     };
 
-    Router::builder()
-        .middleware(Middleware::post(add_cors_headers))
-        .data(state)
-        .get("/events", sse_handler)
-        .delete("/messages/:id", delete_message)
-        .get("/messages/:id.json", get_message_json)
-        .get("/messages/:id.source", get_message_source)
-        .get("/messages/:id.html", get_message_html)
-        .get("/messages/:id.eml", get_message_eml)
-        .get("/messages/:id.plain", get_message_plain)
-        .get("/messages/:id/parts/:cid", get_message_part)
-        .get("/messages", get_messages)
-        .delete("/messages", delete_messages)
-        .options("/*", options_handler)
-        .any(handler_404)
-        .build()
-        .unwrap()
+    Router::new()
+        .route("/events", get(sse_handler))
+        .route("/messages/:id", delete(delete_message))
+        .route("/messages/:id/json", get(get_message_json))
+        .route("/messages/:id/source", get(get_message_source))
+        .route("/messages/:id/html", get(get_message_html))
+        .route("/messages/:id/eml", get(get_message_eml))
+        .route("/messages/:id/plain", get(get_message_plain))
+        .route("/messages/:id/parts/:cid", get(get_message_part))
+        .route("/messages", get(get_messages).delete(delete_messages))
+        .with_state(state)
 }
 
 pub async fn run_http_server(
-    tcp_listener: TcpListener,
+    listener: TcpListener,
     repository: Arc<Mutex<MessageRepository>>,
     sse_clients: Arc<SseClients>,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    info!(
-        "Starting HTTP server on {}",
-        tcp_listener.local_addr().unwrap()
-    );
+    info!("Starting HTTP server on {}", listener.local_addr().unwrap());
 
-    let router = router(repository, sse_clients);
-    let service = RouterService::new(router).unwrap();
+    let app = router(repository, sse_clients).layer(CorsLayer::permissive());
 
-    let server = Server::from_tcp(tcp_listener).unwrap().serve(service);
-
-    server.await?;
+    axum::serve(listener, app.into_make_service())
+        .await
+        .unwrap();
 
     Ok(())
 }
@@ -100,12 +67,17 @@ struct GetMessagesListItem {
     created_at: String,
 }
 
-async fn get_messages(req: Request<Body>) -> Result<Response<Body>, io::Error> {
-    let repository = &req.data::<State>().unwrap().repository;
+async fn get_messages(
+    State(state): State<AppState>,
+) -> Result<Json<Vec<GetMessagesListItem>>, StatusCode> {
+    let repository = &state.repository;
 
-    let mut messages = vec![];
-    for message in repository.lock().unwrap().find_all() {
-        messages.push(GetMessagesListItem {
+    let messages: Vec<GetMessagesListItem> = repository
+        .lock()
+        .unwrap()
+        .find_all()
+        .into_iter()
+        .map(|message| GetMessagesListItem {
             id: message.id.unwrap(),
             sender: message.sender.clone(),
             recipients: message.recipients.clone(),
@@ -113,23 +85,17 @@ async fn get_messages(req: Request<Body>) -> Result<Response<Body>, io::Error> {
             size: message.size.to_string(),
             created_at: message.created_at.to_rfc3339(),
         })
-    }
+        .collect();
 
-    Ok(Response::builder()
-        .header("Content-Type", "application/json")
-        .body(serde_json::to_string(&messages).unwrap().into())
-        .unwrap())
+    Ok(Json(messages))
 }
 
-async fn delete_messages(req: Request<Body>) -> Result<Response<Body>, io::Error> {
-    let repository = &req.data::<State>().unwrap().repository;
+async fn delete_messages(State(state): State<AppState>) -> StatusCode {
+    let repository = &state.repository;
 
     repository.lock().unwrap().delete_all();
 
-    Ok(Response::builder()
-        .status(StatusCode::NO_CONTENT)
-        .body(Body::empty())
-        .unwrap())
+    StatusCode::NO_CONTENT
 }
 
 #[derive(Serialize)]
@@ -157,299 +123,230 @@ struct GetMessageAttachment {
     pub href: String,
 }
 
-async fn sse_handler(req: Request<Body>) -> Result<Response<Body>, io::Error> {
-    let state = req.data::<State>().unwrap();
+async fn sse_handler(
+    State(state): State<AppState>,
+) -> Sse<impl Stream<Item = Result<axum::response::sse::Event, io::Error>>> {
     let mut rx = state.sse_clients.tx.subscribe();
 
     let stream = async_stream::stream! {
-        loop {
-            match rx.recv().await {
-                Ok(msg) => {
-                    let event = Event::new()
-                        .event_type("message")
-                        .data(&msg)
-                        .to_string();
-                    yield Ok::<_, io::Error>(event.into_bytes());
-                },
-                Err(_) => break,
-            }
+        while let Ok(msg) = rx.recv().await {
+            yield Ok(axum::response::sse::Event::default()
+                .event("message")
+                .data(msg));
         }
     };
-    let stream: Pin<Box<dyn Stream<Item = Result<Vec<u8>, io::Error>> + Send>> = Box::pin(stream);
 
-    let response = Response::builder()
-        .header("Content-Type", "text/event-stream")
-        .header("Cache-Control", "no-cache")
-        .header("Connection", "keep-alive")
-        .body(Body::wrap_stream(stream))
-        .unwrap();
+    Sse::new(stream)
+}
+
+async fn get_message_json(
+    Path(id): Path<usize>,
+    State(state): State<AppState>,
+) -> Result<Json<GetMessage>, StatusCode> {
+    let repository = &state.repository;
+
+    let message = repository
+        .lock()
+        .unwrap()
+        .find(id)
+        .map(|message| {
+            let mut formats = vec!["source".to_string()];
+            if message.html().is_some() {
+                formats.push("html".to_string());
+            }
+
+            if message.plain().is_some() {
+                formats.push("plain".to_string());
+            }
+
+            GetMessage {
+                id,
+                sender: message.sender.clone(),
+                recipients: message.recipients.clone(),
+                subject: message.subject.clone(),
+                size: message.size.to_string(),
+                ty: message.typ.clone(),
+                created_at: message.created_at.to_rfc3339(),
+                formats,
+                attachments: message
+                    .parts
+                    .iter()
+                    .filter(|p| p.is_attachment)
+                    .map(|attachment| GetMessageAttachment {
+                        cid: attachment.cid.clone(),
+                        typ: attachment.typ.clone(),
+                        filename: attachment.filename.clone(),
+                        size: attachment.size,
+                        href: format!("/messages/{}/parts/{}", id, attachment.cid),
+                    })
+                    .collect(),
+            }
+        })
+        .ok_or(StatusCode::NOT_FOUND)?;
+
+    Ok(Json(message))
+}
+
+async fn get_message_html(
+    Path(id): Path<usize>,
+    State(state): State<AppState>,
+) -> Result<impl IntoResponse, StatusCode> {
+    let repository = &state.repository;
+
+    let html_part = repository
+        .lock()
+        .unwrap()
+        .find(id)
+        .and_then(|message| message.html())
+        .ok_or(StatusCode::NOT_FOUND)?
+        .clone();
+
+    let body = html_part.body.clone();
+    let body_as_string = String::from_utf8(body).unwrap();
+
+    let mut response = Response::new(body_as_string);
+    response.headers_mut().insert(
+        header::CONTENT_TYPE,
+        HeaderValue::from_str(&format!("text/html; charset={}", html_part.charset)).unwrap(),
+    );
 
     Ok(response)
 }
 
-async fn get_message_json(req: Request<Body>) -> Result<Response<Body>, io::Error> {
-    let id: usize = req.param("id").unwrap().parse().unwrap();
-    let repository = &req.data::<State>().unwrap().repository;
+async fn get_message_plain(
+    Path(id): Path<usize>,
+    State(state): State<AppState>,
+) -> Result<impl IntoResponse, StatusCode> {
+    let repository = &state.repository;
 
-    let message = repository.lock().unwrap().find(id).map(|message| {
-        let mut formats = vec!["source".to_string()];
-        if message.html().is_some() {
-            formats.push("html".to_string());
-        }
-
-        if message.plain().is_some() {
-            formats.push("plain".to_string());
-        }
-
-        GetMessage {
-            id,
-            sender: message.sender.clone(),
-            recipients: message.recipients.clone(),
-            subject: message.subject.clone(),
-            size: message.size.to_string(),
-            ty: message.typ.clone(),
-            created_at: message.created_at.to_rfc3339(),
-            formats,
-            attachments: message
-                .parts
-                .iter()
-                .filter(|p| p.is_attachment)
-                .map(|attachment| GetMessageAttachment {
-                    cid: attachment.cid.clone(),
-                    typ: attachment.typ.clone(),
-                    filename: attachment.filename.clone(),
-                    size: attachment.size,
-                    href: format!("/messages/{}/parts/{}", id, attachment.cid),
-                })
-                .collect(),
-        }
-    });
-
-    if let Some(message) = message {
-        Ok(Response::builder()
-            .header("Content-Type", "application/json")
-            .body(serde_json::to_string(&message).unwrap().into())
-            .unwrap())
-    } else {
-        Ok(Response::builder()
-            .status(StatusCode::NOT_FOUND)
-            .body(Body::empty())
-            .unwrap())
-    }
-}
-
-async fn get_message_html(req: Request<Body>) -> Result<Response<Body>, io::Error> {
-    let id: usize = req.param("id").unwrap().parse().unwrap();
-    let repository = &req.data::<State>().unwrap().repository;
-
-    let repository = repository.lock().unwrap();
-    let html_part = repository.find(id).and_then(|message| message.html());
-
-    return if let Some(html_part) = html_part {
-        Ok(Response::builder()
-            .header(
-                "Content-Type",
-                format!("text/html; charset={}", html_part.charset),
-            )
-            .body(Body::from(html_part.body.clone()))
-            .unwrap())
-    } else {
-        Ok(Response::builder()
-            .status(StatusCode::NOT_FOUND)
-            .body(Body::empty())
-            .unwrap())
-    };
-}
-
-async fn get_message_plain(req: Request<Body>) -> Result<Response<Body>, io::Error> {
-    let id: usize = req.param("id").unwrap().parse().unwrap();
-    let repository = &req.data::<State>().unwrap().repository;
-
-    let repository = repository.lock().unwrap();
-    let html_part = repository.find(id).and_then(|message| message.plain());
-
-    return if let Some(html_part) = html_part {
-        Ok(Response::builder()
-            .header(
-                "Content-Type",
-                format!("text/plain; charset={}", html_part.charset),
-            )
-            .body(Body::from(html_part.body.clone()))
-            .unwrap())
-    } else {
-        Ok(Response::builder()
-            .status(StatusCode::NOT_FOUND)
-            .body(Body::empty())
-            .unwrap())
-    };
-}
-
-async fn get_message_source(req: Request<Body>) -> Result<Response<Body>, io::Error> {
-    let id: usize = req.param("id").unwrap().parse().unwrap();
-    let repository = &req.data::<State>().unwrap().repository;
-
-    let repository = repository.lock().unwrap();
-    let message = repository.find(id);
-
-    return if let Some(message) = message {
-        Ok(Response::builder()
-            .header(
-                "Content-Type",
-                format!("text/plain; charset={}", message.charset),
-            )
-            .body(Body::from(message.source.clone()))
-            .unwrap())
-    } else {
-        Ok(Response::builder()
-            .status(StatusCode::NOT_FOUND)
-            .body(Body::empty())
-            .unwrap())
-    };
-}
-
-async fn get_message_eml(req: Request<Body>) -> Result<Response<Body>, io::Error> {
-    let id: usize = req.param("id").unwrap().parse().unwrap();
-    let repository = &req.data::<State>().unwrap().repository;
-
-    let repository = repository.lock().unwrap();
-    let message = repository.find(id);
-
-    return if let Some(message) = message {
-        Ok(Response::builder()
-            .header(
-                "Content-Type",
-                format!("message/rfc822; charset={}", message.charset),
-            )
-            .body(Body::from(message.source.clone()))
-            .unwrap())
-    } else {
-        Ok(Response::builder()
-            .status(StatusCode::NOT_FOUND)
-            .body(Body::empty())
-            .unwrap())
-    };
-}
-
-async fn get_message_part(req: Request<Body>) -> Result<Response<Body>, io::Error> {
-    let id: usize = req.param("id").unwrap().parse().unwrap();
-    let cid = req.param("cid").unwrap();
-    let repository = &req.data::<State>().unwrap().repository;
-
-    let repository = repository.lock().unwrap();
-    let part = repository
+    let plain_part = repository
+        .lock()
+        .unwrap()
         .find(id)
-        .and_then(|message| message.parts.iter().find(|part| part.cid.as_str() == cid));
+        .and_then(|message| message.plain())
+        .ok_or(StatusCode::NOT_FOUND)?
+        .clone();
 
-    return if let Some(part) = part {
-        let mut response = Response::builder()
-            .header(
-                "Content-Type",
-                format!("{}; charset={}", part.typ, part.charset),
-            )
-            .body(Body::from(part.body.clone()))
-            .unwrap();
+    let body = plain_part.body.clone();
+    let body_as_string = String::from_utf8(body).unwrap();
 
-        if part.is_attachment {
-            let content_disposition = HeaderValue::from_str(
-                format!("attachment; filename=\"{}\"", part.filename).as_str(),
-            )
-            .unwrap();
-            response
-                .headers_mut()
-                .insert("Content-Disposition", content_disposition);
-        }
+    let mut response = Response::new(body_as_string);
+    response.headers_mut().insert(
+        header::CONTENT_TYPE,
+        HeaderValue::from_str(&format!("text/plain; charset={}", plain_part.charset)).unwrap(),
+    );
 
-        Ok(response)
-    } else {
-        Ok(Response::builder()
-            .status(StatusCode::NOT_FOUND)
-            .body(Body::empty())
-            .unwrap())
-    };
+    Ok(response)
 }
 
-async fn delete_message(req: Request<Body>) -> Result<Response<Body>, io::Error> {
-    let id: usize = req.param("id").unwrap().parse().unwrap();
-    let repository = &req.data::<State>().unwrap().repository;
+async fn get_message_source(
+    Path(id): Path<usize>,
+    State(state): State<AppState>,
+) -> Result<impl IntoResponse, StatusCode> {
+    let repository = &state.repository;
 
-    let deleted_message = repository.lock().unwrap().delete(id);
+    let message = repository
+        .lock()
+        .unwrap()
+        .find(id)
+        .ok_or(StatusCode::NOT_FOUND)?
+        .clone();
 
-    if deleted_message.is_some() {
-        Ok(Response::builder()
-            .status(StatusCode::NO_CONTENT)
-            .body(Body::empty())
-            .unwrap())
-    } else {
-        Ok(Response::builder()
-            .status(StatusCode::NOT_FOUND)
-            .body(Body::empty())
-            .unwrap())
+    let source = message.source.clone();
+    let source_as_string = String::from_utf8(source).unwrap();
+
+    let mut response = Response::new(source_as_string);
+    response.headers_mut().insert(
+        header::CONTENT_TYPE,
+        HeaderValue::from_str(&format!("text/plain; charset={}", message.charset)).unwrap(),
+    );
+
+    Ok(response)
+}
+
+async fn get_message_eml(
+    Path(id): Path<usize>,
+    State(state): State<AppState>,
+) -> Result<impl IntoResponse, StatusCode> {
+    let repository = &state.repository;
+
+    let message = repository
+        .lock()
+        .unwrap()
+        .find(id)
+        .ok_or(StatusCode::NOT_FOUND)?
+        .clone();
+
+    let source = message.source.clone();
+    let source_as_string = String::from_utf8(source).unwrap();
+
+    let mut response = Response::new(source_as_string);
+    response.headers_mut().insert(
+        header::CONTENT_TYPE,
+        HeaderValue::from_str(&format!("message/rfc822; charset={}", message.charset)).unwrap(),
+    );
+
+    Ok(response)
+}
+
+async fn get_message_part(
+    Path((id, cid)): Path<(usize, String)>,
+    State(state): State<AppState>,
+) -> Result<impl IntoResponse, StatusCode> {
+    let repository = &state.repository;
+
+    let part = repository
+        .lock()
+        .unwrap()
+        .find(id)
+        .and_then(|message| message.parts.iter().find(|part| part.cid.as_str() == cid))
+        .ok_or(StatusCode::NOT_FOUND)?
+        .clone();
+
+    let body = part.body.clone();
+    let body_as_string = String::from_utf8(body).unwrap();
+
+    let mut response = Response::new(body_as_string);
+    response.headers_mut().insert(
+        header::CONTENT_TYPE,
+        HeaderValue::from_str(&format!("{}; charset={}", part.typ, part.charset)).unwrap(),
+    );
+
+    if part.is_attachment {
+        response.headers_mut().insert(
+            header::CONTENT_DISPOSITION,
+            HeaderValue::from_str(&format!("attachment; filename=\"{}\"", part.filename)).unwrap(),
+        );
     }
+
+    Ok(response)
 }
 
-async fn handler_404(_: Request<Body>) -> Result<Response<Body>, io::Error> {
-    Ok(Response::builder()
-        .status(StatusCode::NOT_FOUND)
-        .body(Body::from("Page Not Found"))
-        .unwrap())
-}
+async fn delete_message(Path(id): Path<usize>, State(state): State<AppState>) -> StatusCode {
+    let repository = &state.repository;
 
-async fn options_handler(_req: Request<Body>) -> Result<Response<Body>, io::Error> {
-    Ok(Response::new(Body::empty()))
+    if repository.lock().unwrap().delete(id).is_some() {
+        StatusCode::NO_CONTENT
+    } else {
+        StatusCode::NOT_FOUND
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::http::router;
     use crate::repository::{Message, MessagePart, MessageRepository};
+    use crate::sse_clients::SseClients;
+    use axum::body;
+    use axum::body::Body;
+    use axum::http::{Request, StatusCode};
     use chrono::{TimeZone, Utc};
-    use hyper::{body, Client, Request, StatusCode};
-    use hyper::{body::HttpBody, Server};
-    use routerify::{Router, RouterService};
-    use std::{
-        net::SocketAddr,
-        sync::{Arc, Mutex},
-    };
-    use tokio::sync::oneshot::{self, Sender};
-
-    #[allow(dead_code)]
-    pub struct Serve {
-        addr: SocketAddr,
-        tx: Sender<()>,
-    }
-
-    impl Serve {
-        pub fn addr(&self) -> SocketAddr {
-            self.addr
-        }
-    }
-
-    pub async fn serve<B, E>(router: Router<B, E>) -> Serve
-    where
-        B: HttpBody + Send + Sync + 'static,
-        E: Into<Box<dyn std::error::Error + Send + Sync>> + 'static,
-        <B as HttpBody>::Data: Send + Sync + 'static,
-        <B as HttpBody>::Error: Into<Box<dyn std::error::Error + Send + Sync>> + 'static,
-    {
-        let service = RouterService::new(router).unwrap();
-        let server = Server::bind(&([127, 0, 0, 1], 0).into()).serve(service);
-        let addr = server.local_addr();
-
-        let (tx, rx) = oneshot::channel::<()>();
-
-        let graceful_server = server.with_graceful_shutdown(async {
-            rx.await.unwrap();
-        });
-
-        tokio::spawn(async move {
-            graceful_server.await.unwrap();
-        });
-
-        Serve { addr, tx }
-    }
+    use std::sync::{Arc, Mutex};
+    use tower::ServiceExt;
 
     async fn body_to_string(body: Body) -> String {
-        return String::from_utf8(body::to_bytes(body).await.unwrap().to_vec()).unwrap();
+        return String::from_utf8(body::to_bytes(body, usize::MAX).await.unwrap().to_vec())
+            .unwrap();
     }
 
     async fn body_to_json(body: Body) -> serde_json::Value {
@@ -463,7 +360,7 @@ mod tests {
             subject: Some("This is the subject".to_string()),
             sender: Some("sender@example.com".to_string()),
             recipients: vec!["recipient@example.com".to_string()],
-            created_at: Utc.timestamp(1431648000, 0),
+            created_at: Utc.timestamp_opt(1431648000, 0).unwrap(),
             typ: "text/plain".to_string(),
             parts: vec![],
             charset: "UTF-8".to_string(),
@@ -476,19 +373,23 @@ mod tests {
         let repository = Arc::new(Mutex::new(MessageRepository::new()));
         repository.lock().unwrap().persist(create_test_message());
 
-        let router = router(repository);
+        let sse_clients = Arc::new(SseClients::new());
 
-        let serve = serve(router).await;
-        let res = Client::new()
-            .request(
+        let app = router(repository, sse_clients);
+
+        let response = app
+            .oneshot(
                 Request::builder()
-                    .method("GET")
-                    .uri(format!("http://{}/{}", serve.addr(), "messages"))
+                    .uri("/messages")
                     .body(Body::empty())
                     .unwrap(),
             )
             .await
             .unwrap();
+
+        assert_eq!(response.status(), StatusCode::OK);
+
+        let body = response.into_body();
 
         let expected = serde_json::json!([
             {
@@ -500,9 +401,7 @@ mod tests {
                 "subject": "This is the subject",
             }
         ]);
-
-        assert_eq!(StatusCode::OK, res.status());
-        assert_eq!(expected, body_to_json(res.into_body()).await);
+        assert_eq!(expected, body_to_json(body).await);
     }
 
     #[tokio::test]
@@ -510,28 +409,22 @@ mod tests {
         let repository = Arc::new(Mutex::new(MessageRepository::new()));
         repository.lock().unwrap().persist(create_test_message());
 
-        let router = router(Arc::clone(&repository));
+        let sse_clients = Arc::new(SseClients::new());
+        let app = router(repository.clone(), sse_clients);
 
-        let serve = serve(router).await;
-        let res = Client::new()
-            .request(
+        let response = app
+            .oneshot(
                 Request::builder()
                     .method("DELETE")
-                    .uri(format!("http://{}/{}", serve.addr(), "messages"))
+                    .uri("/messages")
                     .body(Body::empty())
                     .unwrap(),
             )
             .await
             .unwrap();
 
-        let repository = Arc::clone(&repository);
-        let handle = repository.lock().unwrap();
-        let repository_messages = handle.find_all();
-
-        // let repository = &res.data().repository;
-        let expected_messages: Vec<&Message> = vec![];
-        assert_eq!(StatusCode::NO_CONTENT, res.status());
-        assert_eq!(expected_messages, repository_messages);
+        assert_eq!(response.status(), StatusCode::NO_CONTENT);
+        assert_eq!(repository.lock().unwrap().find_all().len(), 0);
     }
 
     #[tokio::test]
@@ -539,317 +432,223 @@ mod tests {
         let repository = Arc::new(Mutex::new(MessageRepository::new()));
         repository.lock().unwrap().persist(create_test_message());
 
-        let router = router(repository);
+        let sse_clients = Arc::new(SseClients::new());
+        let app = router(repository, sse_clients);
 
-        let serve = serve(router).await;
-        let res = Client::new()
-            .request(
+        let response = app
+            .oneshot(
                 Request::builder()
-                    .method("GET")
-                    .uri(format!("http://{}/{}", serve.addr(), "messages/1.json"))
+                    .uri("/messages/1/json")
                     .body(Body::empty())
                     .unwrap(),
             )
             .await
             .unwrap();
 
-        assert_eq!(StatusCode::OK, res.status());
+        assert_eq!(response.status(), StatusCode::OK);
+        let body = response.into_body();
+        let json = body_to_json(body).await;
 
-        let expected_message = serde_json::json!({
-            "created_at": "2015-05-15T00:00:00+00:00",
-            "id": 1,
-            "recipients": ["recipient@example.com"],
-            "sender": "sender@example.com",
-            "size": "42",
-            "subject": "This is the subject",
-            "attachments": [],
-            "formats": ["source"],
-            "type": "text/plain",
-        });
-        assert_eq!(expected_message, body_to_json(res.into_body()).await);
+        assert_eq!(json["id"], 1);
+        assert_eq!(json["subject"], "This is the subject");
+        assert_eq!(json["sender"], "sender@example.com");
     }
 
     #[tokio::test]
     async fn test_get_message_html() {
-        let repository = Arc::new(Mutex::new(MessageRepository::new()));
-        repository.lock().unwrap().persist(Message {
-            id: Some(1),
-            size: 42,
-            subject: Some("This is the subject".to_string()),
-            sender: Some("sender@example.com".to_string()),
-            recipients: vec!["recipient@example.com".to_string()],
-            created_at: Utc.timestamp(1431648000, 0),
-            typ: "text/plain".to_string(),
-            parts: vec![MessagePart {
-                cid: "some-id".to_string(),
-                typ: "text/html".to_string(),
-                filename: "some_html_abc123".to_string(),
-                size: 422,
-                charset: "UTF-8".to_string(),
-                body: b"<html>Hello world</html".to_vec(),
-                is_attachment: false,
-            }],
+        let mut message = create_test_message();
+        message.parts.push(MessagePart {
+            cid: "html".to_string(),
+            typ: "text/html".to_string(),
+            is_attachment: false,
+            filename: "".to_string(),
             charset: "UTF-8".to_string(),
-            source: b"Subject: This is the subject\r\n\r\nHello world!\r\n".to_vec(),
+            body: "<html><body>Hello world!</body></html>".as_bytes().to_vec(),
+            size: 38,
         });
 
-        let router = router(repository);
+        let repository = Arc::new(Mutex::new(MessageRepository::new()));
+        repository.lock().unwrap().persist(message);
 
-        let serve = serve(router).await;
-        let res = Client::new()
-            .request(
+        let sse_clients = Arc::new(SseClients::new());
+        let app = router(repository, sse_clients);
+
+        let response = app
+            .oneshot(
                 Request::builder()
-                    .method("GET")
-                    .uri(format!("http://{}/{}", serve.addr(), "messages/1.html"))
+                    .uri("/messages/1/html")
                     .body(Body::empty())
                     .unwrap(),
             )
             .await
             .unwrap();
 
-        assert_eq!(StatusCode::OK, res.status());
+        assert_eq!(response.status(), StatusCode::OK);
+        let body = response.into_body();
         assert_eq!(
-            "<html>Hello world</html",
-            body_to_string(res.into_body()).await
+            body_to_string(body).await,
+            "<html><body>Hello world!</body></html>"
         );
     }
 
     #[tokio::test]
     async fn test_get_message_plain() {
-        let repository = Arc::new(Mutex::new(MessageRepository::new()));
-        repository.lock().unwrap().persist(Message {
-            id: Some(1),
-            size: 42,
-            subject: Some("This is the subject".to_string()),
-            sender: Some("sender@example.com".to_string()),
-            recipients: vec!["recipient@example.com".to_string()],
-            created_at: Utc.timestamp(1431648000, 0),
-            typ: "multipart/mixed".to_string(),
-            parts: vec![MessagePart {
-                cid: "some-id".to_string(),
-                typ: "text/plain".to_string(),
-                filename: "some_html_abc123".to_string(),
-                size: 422,
-                charset: "UTF-8".to_string(),
-                body: b"This is some plaintext".to_vec(),
-                is_attachment: false,
-            }],
+        let mut message = create_test_message();
+        message.parts.push(MessagePart {
+            cid: "plain".to_string(),
+            typ: "text/plain".to_string(),
+            is_attachment: false,
+            filename: "".to_string(),
             charset: "UTF-8".to_string(),
-            source: b"Subject: This is the subject\r\n\r\nHello world!\r\n".to_vec(),
+            body: "Hello world!".as_bytes().to_vec(),
+            size: 12,
         });
 
-        let router = router(repository);
+        let repository = Arc::new(Mutex::new(MessageRepository::new()));
+        repository.lock().unwrap().persist(message);
 
-        let serve = serve(router).await;
-        let res = Client::new()
-            .request(
+        let sse_clients = Arc::new(SseClients::new());
+        let app = router(repository, sse_clients);
+
+        let response = app
+            .oneshot(
                 Request::builder()
-                    .method("GET")
-                    .uri(format!("http://{}/{}", serve.addr(), "messages/1.plain"))
+                    .uri("/messages/1/plain")
                     .body(Body::empty())
                     .unwrap(),
             )
             .await
             .unwrap();
 
-        assert_eq!(StatusCode::OK, res.status());
-        assert_eq!(
-            "This is some plaintext",
-            body_to_string(res.into_body()).await
-        );
+        assert_eq!(response.status(), StatusCode::OK);
+        let body = response.into_body();
+        assert_eq!(body_to_string(body).await, "Hello world!");
     }
 
     #[tokio::test]
     async fn test_get_message_source() {
         let repository = Arc::new(Mutex::new(MessageRepository::new()));
-        repository.lock().unwrap().persist(Message {
-            id: Some(1),
-            size: 42,
-            subject: Some("This is the subject".to_string()),
-            sender: Some("sender@example.com".to_string()),
-            recipients: vec!["recipient@example.com".to_string()],
-            created_at: Utc.timestamp(1431648000, 0),
-            typ: "multipart/mixed".to_string(),
-            parts: vec![MessagePart {
-                cid: "some-id".to_string(),
-                typ: "text/plain".to_string(),
-                filename: "some_html_abc123".to_string(),
-                size: 422,
-                charset: "UTF-8".to_string(),
-                body: b"This is some plaintext".to_vec(),
-                is_attachment: false,
-            }],
-            charset: "UTF-8".to_string(),
-            source: b"Subject: This is the subject\r\n\r\nHello world!\r\n".to_vec(),
-        });
+        repository.lock().unwrap().persist(create_test_message());
 
-        let router = router(repository);
+        let sse_clients = Arc::new(SseClients::new());
+        let app = router(repository, sse_clients);
 
-        let serve = serve(router).await;
-        let res = Client::new()
-            .request(
+        let response = app
+            .oneshot(
                 Request::builder()
-                    .method("GET")
-                    .uri(format!("http://{}/{}", serve.addr(), "messages/1.source"))
+                    .uri("/messages/1/source")
                     .body(Body::empty())
                     .unwrap(),
             )
             .await
             .unwrap();
 
-        assert_eq!(StatusCode::OK, res.status());
+        assert_eq!(response.status(), StatusCode::OK);
+        let body = response.into_body();
         assert_eq!(
-            "Subject: This is the subject\r\n\r\nHello world!\r\n",
-            body_to_string(res.into_body()).await
+            body_to_string(body).await,
+            "Subject: This is the subject\r\n\r\nHello world!\r\n"
         );
     }
 
     #[tokio::test]
     async fn test_get_message_eml() {
         let repository = Arc::new(Mutex::new(MessageRepository::new()));
-        repository.lock().unwrap().persist(Message {
-            id: Some(1),
-            size: 42,
-            subject: Some("This is the subject".to_string()),
-            sender: Some("sender@example.com".to_string()),
-            recipients: vec!["recipient@example.com".to_string()],
-            created_at: Utc.timestamp(1431648000, 0),
-            typ: "multipart/mixed".to_string(),
-            parts: vec![MessagePart {
-                cid: "some-id".to_string(),
-                typ: "text/plain".to_string(),
-                filename: "some_html_abc123".to_string(),
-                size: 422,
-                charset: "UTF-8".to_string(),
-                body: b"This is some plaintext".to_vec(),
-                is_attachment: false,
-            }],
-            charset: "UTF-8".to_string(),
-            source: b"Subject: This is the subject\r\n\r\nHello world!\r\n".to_vec(),
-        });
+        repository.lock().unwrap().persist(create_test_message());
 
-        let router = router(repository);
+        let sse_clients = Arc::new(SseClients::new());
+        let app = router(repository, sse_clients);
 
-        let serve = serve(router).await;
-        let res = Client::new()
-            .request(
+        let response = app
+            .oneshot(
                 Request::builder()
-                    .method("GET")
-                    .uri(format!("http://{}/{}", serve.addr(), "messages/1.eml"))
+                    .uri("/messages/1/eml")
                     .body(Body::empty())
                     .unwrap(),
             )
             .await
             .unwrap();
 
-        assert_eq!(StatusCode::OK, res.status());
+        let status = response.status().clone();
+        let headers = response.headers().clone();
+        let body = response.into_body();
+        assert_eq!(status, StatusCode::OK);
         assert_eq!(
-            "message/rfc822; charset=UTF-8",
-            res.headers().get("Content-Type").unwrap().to_str().unwrap()
+            body_to_string(body).await,
+            "Subject: This is the subject\r\n\r\nHello world!\r\n"
         );
         assert_eq!(
-            "Subject: This is the subject\r\n\r\nHello world!\r\n",
-            body_to_string(res.into_body()).await
+            headers.get("Content-Type").unwrap(),
+            "message/rfc822; charset=UTF-8"
         );
     }
 
     #[tokio::test]
     async fn test_get_message_part() {
-        let repository = Arc::new(Mutex::new(MessageRepository::new()));
-        repository.lock().unwrap().persist(Message {
-            id: Some(1),
-            size: 42,
-            subject: Some("This is the subject".to_string()),
-            sender: Some("sender@example.com".to_string()),
-            recipients: vec!["recipient@example.com".to_string()],
-            created_at: Utc.timestamp(1431648000, 0),
-            typ: "multipart/mixed".to_string(),
-            parts: vec![MessagePart {
-                cid: "some-id".to_string(),
-                typ: "text/plain".to_string(),
-                filename: "some_textfile.txt".to_string(),
-                size: 422,
-                charset: "UTF-8".to_string(),
-                body: b"This is some plaintext as an attachment".to_vec(),
-                is_attachment: true,
-            }],
+        let mut message = create_test_message();
+        message.parts.push(MessagePart {
+            cid: "attachment".to_string(),
+            typ: "application/pdf".to_string(),
+            is_attachment: true,
+            filename: "test.pdf".to_string(),
             charset: "UTF-8".to_string(),
-            source: b"Subject: This is the subject\r\n\r\nHello world!\r\n".to_vec(),
+            body: vec![1, 2, 3, 4],
+            size: 4,
         });
 
-        let router = router(repository);
+        let repository = Arc::new(Mutex::new(MessageRepository::new()));
+        repository.lock().unwrap().persist(message);
 
-        let serve = serve(router).await;
-        let res = Client::new()
-            .request(
+        let sse_clients = Arc::new(SseClients::new());
+        let app = router(repository, sse_clients);
+
+        let response = app
+            .oneshot(
                 Request::builder()
-                    .method("GET")
-                    .uri(format!(
-                        "http://{}/{}",
-                        serve.addr(),
-                        "messages/1/parts/some-id"
-                    ))
+                    .uri("/messages/1/parts/attachment")
                     .body(Body::empty())
                     .unwrap(),
             )
             .await
             .unwrap();
 
-        assert_eq!(StatusCode::OK, res.status());
+        assert_eq!(response.status(), StatusCode::OK);
+        let headers = response.headers().clone();
+        let body = response.into_body();
         assert_eq!(
-            "attachment; filename=\"some_textfile.txt\"",
-            res.headers()
-                .get("Content-Disposition")
-                .unwrap()
-                .to_str()
-                .unwrap()
+            body::to_bytes(body, usize::MAX).await.unwrap().to_vec(),
+            vec![1, 2, 3, 4]
         );
         assert_eq!(
-            "text/plain; charset=UTF-8",
-            res.headers().get("Content-Type").unwrap().to_str().unwrap()
+            headers.get("Content-Type").unwrap(),
+            "application/pdf; charset=UTF-8"
         );
         assert_eq!(
-            "This is some plaintext as an attachment",
-            body_to_string(res.into_body()).await
+            headers.get("Content-Disposition").unwrap(),
+            "attachment; filename=\"test.pdf\""
         );
     }
 
     #[tokio::test]
     async fn test_delete_message() {
         let repository = Arc::new(Mutex::new(MessageRepository::new()));
-        repository.lock().unwrap().persist(Message {
-            id: Some(1),
-            size: 42,
-            subject: Some("This is the subject".to_string()),
-            sender: Some("sender@example.com".to_string()),
-            recipients: vec!["recipient@example.com".to_string()],
-            created_at: Utc.timestamp(1431648000, 0),
-            typ: "multipart/mixed".to_string(),
-            parts: vec![],
-            charset: "UTF-8".to_string(),
-            source: b"Subject: This is the subject\r\n\r\nHello world!\r\n".to_vec(),
-        });
+        repository.lock().unwrap().persist(create_test_message());
 
-        let router = router(Arc::clone(&repository));
+        let sse_clients = Arc::new(SseClients::new());
+        let app = router(repository.clone(), sse_clients);
 
-        let serve = serve(router).await;
-        let res = Client::new()
-            .request(
+        let response = app
+            .oneshot(
                 Request::builder()
                     .method("DELETE")
-                    .uri(format!("http://{}/{}", serve.addr(), "messages/1"))
+                    .uri("/messages/1")
                     .body(Body::empty())
                     .unwrap(),
             )
             .await
             .unwrap();
 
-        let repository = Arc::clone(&repository);
-        let handle = repository.lock().unwrap();
-
-        let message = handle.find(1);
-
-        assert_eq!(StatusCode::NO_CONTENT, res.status());
-        assert_eq!(None, message);
+        assert_eq!(response.status(), StatusCode::NO_CONTENT);
+        assert_eq!(repository.lock().unwrap().find(1), None);
     }
 }

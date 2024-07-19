@@ -1,10 +1,11 @@
 use chrono::{TimeZone, Utc};
 use reqwest::{Method, Response};
-use std::net::{SocketAddr, TcpListener};
+use std::net::SocketAddr;
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use tiny_mailcatcher::http::run_http_server;
 use tiny_mailcatcher::repository::{Message, MessageRepository};
+use tiny_mailcatcher::sse_clients::SseClients;
 use tokio::task::JoinHandle;
 
 fn create_repository_with_messages(messages: Vec<Message>) -> Arc<Mutex<MessageRepository>> {
@@ -17,12 +18,16 @@ fn create_repository_with_messages(messages: Vec<Message>) -> Arc<Mutex<MessageR
     Arc::new(Mutex::new(repository))
 }
 
-fn launch_test_http_server(repository: Arc<Mutex<MessageRepository>>, port: u16) -> JoinHandle<()> {
+async fn launch_test_http_server(
+    repository: Arc<Mutex<MessageRepository>>,
+    sse_clients: Arc<SseClients>,
+    port: u16,
+) -> JoinHandle<()> {
     let addr = SocketAddr::from_str(format!("127.0.0.1:{}", port).as_str()).unwrap();
-    let tcp_listener = TcpListener::bind(addr).unwrap();
+    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
 
     tokio::spawn(async move {
-        run_http_server(tcp_listener, repository.clone())
+        run_http_server(listener, repository.clone(), sse_clients.clone())
             .await
             .unwrap()
     })
@@ -30,10 +35,11 @@ fn launch_test_http_server(repository: Arc<Mutex<MessageRepository>>, port: u16)
 
 async fn do_request(
     repository: Arc<Mutex<MessageRepository>>,
+    sse_clients: Arc<SseClients>,
     method: Method,
     uri: &str,
 ) -> Response {
-    let server = launch_test_http_server(repository, 62043);
+    let server = launch_test_http_server(repository, sse_clients, 62043).await;
     let client = reqwest::Client::new();
     let req = client
         .request(method, "http://127.0.0.1:62043".to_string() + uri)
@@ -54,14 +60,16 @@ async fn test_http_server_is_reachable() {
         subject: Some("This is the subject".to_string()),
         sender: Some("sender@example.com".to_string()),
         recipients: vec!["recipient@example.com".to_string()],
-        created_at: Utc.timestamp(1431648000, 0),
+        created_at: Utc.timestamp_opt(1431648000, 0).unwrap(),
         typ: "text/plain".to_string(),
         parts: vec![],
         charset: "UTF-8".to_string(),
         source: b"Subject: This is the subject\r\n\r\nHello world!\r\n".to_vec(),
     }]);
 
-    let res = do_request(repository, Method::GET, "/messages").await;
+    let sse_clients = Arc::new(SseClients::new());
+
+    let res = do_request(repository, sse_clients, Method::GET, "/messages").await;
     let json = res.json::<serde_json::Value>().await.unwrap();
 
     let expected = serde_json::json!([

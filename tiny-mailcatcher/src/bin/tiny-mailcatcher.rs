@@ -18,7 +18,7 @@ async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
 
     info!("Tiny MailCatcher is starting");
     let http_addr = format!("{}:{}", &args.ip, args.http_port);
-    let http_listener = TcpListener::bind(http_addr).unwrap();
+    let http_listener = tokio::net::TcpListener::bind(http_addr).await.unwrap();
     let http_handle = tokio::spawn(http::run_http_server(
         http_listener,
         repository.clone(),

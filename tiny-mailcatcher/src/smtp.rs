@@ -295,7 +295,7 @@ impl SmtpServerImplementation {
 
         // Send SSE
         let sse_message = serde_json::to_string(&message).unwrap();
-        let _ = self.sse_clients.send(sse_message);
+        self.sse_clients.send(sse_message);
 
         Ok(())
     }
