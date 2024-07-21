@@ -1,4 +1,6 @@
+use crate::models::{GetMessage, GetMessageAttachment, GetMessagesListItem};
 use crate::repository::MessageRepository;
+use crate::sse_clients::SseClients;
 use axum::{
     extract::{Path, State},
     http::{header, HeaderValue, StatusCode},
@@ -7,13 +9,10 @@ use axum::{
     Json, Router,
 };
 use futures::stream::Stream;
-use serde::Serialize;
 use std::io;
 use std::sync::{Arc, Mutex};
 use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
-
-use crate::sse_clients::SseClients;
 
 #[derive(Clone)]
 struct AppState {
@@ -54,16 +53,6 @@ pub async fn run_http_server(
     Ok(())
 }
 
-#[derive(Serialize)]
-struct GetMessagesListItem {
-    id: usize,
-    sender: Option<String>,
-    recipients: Vec<String>,
-    subject: Option<String>,
-    size: String,
-    created_at: String,
-}
-
 async fn get_messages(
     State(state): State<AppState>,
 ) -> Result<Json<Vec<GetMessagesListItem>>, StatusCode> {
@@ -93,31 +82,6 @@ async fn delete_messages(State(state): State<AppState>) -> StatusCode {
     repository.lock().unwrap().delete_all();
 
     StatusCode::NO_CONTENT
-}
-
-#[derive(Serialize)]
-struct GetMessage {
-    id: usize,
-    sender: Option<String>,
-    recipients: Vec<String>,
-    subject: Option<String>,
-    size: String,
-
-    #[serde(rename = "type")]
-    ty: String,
-    created_at: String,
-    formats: Vec<String>,
-    attachments: Vec<GetMessageAttachment>,
-}
-
-#[derive(Serialize)]
-struct GetMessageAttachment {
-    pub cid: String,
-    #[serde(rename = "type")]
-    pub typ: String,
-    pub filename: String,
-    pub size: usize,
-    pub href: String,
 }
 
 async fn sse_handler(

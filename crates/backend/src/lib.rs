@@ -3,6 +3,7 @@
 
 pub mod email;
 pub mod http;
+mod models;
 pub mod repository;
 pub mod smtp;
 pub mod sse_clients;
