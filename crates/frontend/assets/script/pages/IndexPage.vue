@@ -9,7 +9,7 @@
         </div>
         <div v-if="messages.length > 0" class="col-auto ms-auto">
           <div class="btn-list">
-            <a href="#" class="btn btn-danger" @click.prevent="deleteAllMessages()">
+            <a href="#" class="btn btn-danger" @click.prevent="deleteMessages()">
               Delete all messages
             </a>
           </div>
@@ -37,16 +37,11 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 export default {
   name: 'IndexPage',
-  data: function () {
-    return {
-      messages: [],
-    };
-  },
   computed: mapState({
-    apiUrl: state => state.apiUrl,
+    ...mapState(['apiUrl', 'messages']),
     sortedMessages: function () {
       return this.messages.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     },
@@ -59,16 +54,7 @@ export default {
     this.unsubscribeFromSSE();
   },
   methods: {
-    addMessage(message) {
-      this.messages.push(message);
-    },
-    fetchMessages() {
-      this.axios
-        .get(`${this.apiUrl}/messages`)
-        .then((response) => {
-          this.messages = response.data;
-        });
-    },
+    ...mapActions(['fetchMessages', 'addMessage', 'deleteMessages']),
     subscribeToSSE() {
       this.eventSource = new EventSource(`${this.apiUrl}/events`);
       this.eventSource.onmessage = (event) => {
@@ -87,14 +73,6 @@ export default {
         this.eventSource.close();
         this.eventSource = null;
       }
-    },
-    deleteAllMessages() {
-      this
-        .axios
-        .delete(`${this.apiUrl}/messages`)
-        .then(() => {
-          this.messages = [];
-        });
     },
   },
 };

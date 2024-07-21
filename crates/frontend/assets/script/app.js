@@ -1,6 +1,7 @@
 import { createApp } from 'vue';
+import App from './App.vue';
 
-const app = createApp({});
+const app = createApp(App);
 
 // Axios
 // ----------------------------------------------------------------------------
@@ -38,7 +39,42 @@ const store = createStore({
   state () {
     return {
       apiUrl: apiUrl,
+      messages: [],
     };
+  },
+  mutations: {
+    setMessages(state, messages) {
+      state.messages = messages;
+    },
+    addMessage(state, message) {
+      state.messages.push(message);
+    },
+    clearMessages(state) {
+      state.messages = [];
+    },
+  },
+  actions: {
+    async addMessage({ commit }, message) {
+      commit('addMessage', message);
+    },
+    async fetchMessages({ commit }) {
+      const response = await app.axios.get(`${apiUrl}/messages`);
+
+      if (response.status !== 200) {
+        throw new Error('Failed to fetch messages');
+      }
+
+      commit('setMessages', response.data);
+    },
+    async deleteMessages({ commit }) {
+      const response = await app.axios.delete(`${apiUrl}/messages`);
+
+      if (response.status !== 204) {
+        throw new Error('Failed to delete messages');
+      }
+
+      commit('clearMessages');
+    },
   },
 });
 app.use(store);
