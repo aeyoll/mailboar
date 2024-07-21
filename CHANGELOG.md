@@ -2,6 +2,20 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.3.0 - 2024-07-21
+#### Build system
+- **(deps)** upgrade JavaScript dependencies - (14a2520) - *aeyoll*
+- **(deps)** upgrade Rust dependencies - (1633fa4) - *aeyoll*
+- **(docker)** update Dockerfile for cross-compiling - (f9660b1) - *aeyoll*
+#### Features
+- add keep-alive to the sse route - (2c3083a) - aeyoll
+#### Refactoring
+- migrate to rspack (#6) - (3acd5e0) - aeyoll
+- backport tiny-mailcatcher in the project and rewrite it with axum (#5) - (169d67d) - aeyoll
+- improve html message display - (d12f038) - aeyoll
+
+- - -
+
 ## v0.2.0 - 2023-02-19
 #### Bug Fixes
 - update message display when only the source is available - (a283806) - aeyoll
