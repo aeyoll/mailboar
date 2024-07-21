@@ -3,7 +3,7 @@ use axum::{
     extract::{Path, State},
     http::{header, HeaderValue, StatusCode},
     response::{IntoResponse, Response, Sse},
-    routing::{delete, get},
+    routing::get,
     Json, Router,
 };
 use futures::stream::Stream;
@@ -29,12 +29,10 @@ fn router(repository: Arc<Mutex<MessageRepository>>, sse_clients: Arc<SseClients
 
     Router::new()
         .route("/events", get(sse_handler))
-        .route("/messages/:id", delete(delete_message))
-        .route("/messages/:id/json", get(get_message_json))
-        .route("/messages/:id/source", get(get_message_source))
-        .route("/messages/:id/html", get(get_message_html))
-        .route("/messages/:id/eml", get(get_message_eml))
-        .route("/messages/:id/plain", get(get_message_plain))
+        .route(
+            "/messages/:path",
+            get(get_message_by_extension).delete(delete_message),
+        )
         .route("/messages/:id/parts/:cid", get(get_message_part))
         .route("/messages", get(get_messages).delete(delete_messages))
         .with_state(state)
@@ -136,6 +134,34 @@ async fn sse_handler(
     };
 
     Sse::new(stream)
+}
+
+async fn get_message_by_extension(
+    Path(path): Path<String>,
+    State(state): State<AppState>,
+) -> Result<impl IntoResponse, StatusCode> {
+    // Split the id variable into an integer and a string
+    let (id, extension) = path.split_once('.').ok_or(StatusCode::NOT_FOUND)?;
+    let id = id.parse::<usize>().map_err(|_| StatusCode::NOT_FOUND)?;
+
+    match extension {
+        "json" => get_message_json(Path(id), State(state))
+            .await
+            .map(|json| json.into_response()),
+        "source" => get_message_source(Path(id), State(state))
+            .await
+            .map(|resp| resp.into_response()),
+        "html" => get_message_html(Path(id), State(state))
+            .await
+            .map(|resp| resp.into_response()),
+        "eml" => get_message_eml(Path(id), State(state))
+            .await
+            .map(|resp| resp.into_response()),
+        "plain" => get_message_plain(Path(id), State(state))
+            .await
+            .map(|resp| resp.into_response()),
+        _ => Err(StatusCode::NOT_FOUND),
+    }
 }
 
 async fn get_message_json(

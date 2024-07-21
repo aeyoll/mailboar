@@ -111,7 +111,7 @@ export default {
     getMessage(messageId) {
       return this
         .axios
-        .get(`${this.apiUrl}/messages/${messageId}/json`);
+        .get(`${this.apiUrl}/messages/${messageId}.json`);
     },
     deleteMessage() {
       this
@@ -124,7 +124,7 @@ export default {
     getFormat(messageId, format) {
       return this
         .axios
-        .get(`${this.apiUrl}/messages/${messageId}/${format}`);
+        .get(`${this.apiUrl}/messages/${messageId}.${format}`);
     },
     async getSource(messageId) {
       await this
