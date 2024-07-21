@@ -2,6 +2,17 @@ use crate::repository::{Message, MessagePart};
 use chrono::Utc;
 use mailparse::{parse_mail, DispositionType, MailHeaderMap, MailParseError, ParsedMail};
 
+/// Parse a raw email into a `Message` struct
+///
+/// Example:
+/// ```rust
+/// use mailboar_backend::email::parse_message;
+/// let message = parse_message(
+///     &Some("sender@example.com".to_string()),
+///     &["recipient@example.com".to_string()],
+///     b"Subject: This is a test email\nContent-Type: text/plain\n\nHello world!\n"
+/// );
+/// ```
 pub fn parse_message(
     sender: &Option<String>,
     recipients: &[String],
@@ -59,5 +70,38 @@ fn flatten_parts_into<'e>(vec: &mut Vec<&'e ParsedMail<'e>>, parsed_email: &'e P
     for part in &parsed_email.subparts {
         vec.push(part);
         flatten_parts_into(vec, part);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::email::parse_message;
+
+    #[tokio::test]
+    async fn test_parse_message() {
+        let sender = Some("sender@example.com".to_string());
+        let recipients = vec!["recipient@example.com".to_string()];
+        let raw_email = concat!(
+            "Subject: This is a test email\n",
+            "Content-Type: multipart/ alternative; boundary=foobar\n",
+            "Date: Sun, 02 Oct 2016 07:06:22 -0700 (PDT)\n",
+            "\n",
+            "--foobar\n",
+            "Content-Type: text/plain; charset=utf-8\n",
+            "Content-Transfer-Encoding: quoted-printable\n",
+            "\n",
+            "Hello world!\r\n"
+        )
+        .as_bytes();
+
+        let message = parse_message(&sender, &recipients, raw_email);
+        assert!(message.is_ok());
+        let message = message.unwrap();
+        assert_eq!(message.subject, Some("This is a test email".to_string()));
+        assert_eq!(message.sender, sender);
+        assert_eq!(message.recipients, recipients);
+        assert_eq!(message.parts.len(), 1);
+        assert_eq!(message.parts[0].typ, "text/plain");
+        assert_eq!(message.parts[0].body, b"Hello world!\r\n".to_vec());
     }
 }
