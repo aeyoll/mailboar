@@ -427,7 +427,7 @@ mod tests {
         let response = app
             .oneshot(
                 Request::builder()
-                    .uri("/messages/1/json")
+                    .uri("/messages/1.json")
                     .body(Body::empty())
                     .unwrap(),
             )
@@ -465,7 +465,7 @@ mod tests {
         let response = app
             .oneshot(
                 Request::builder()
-                    .uri("/messages/1/html")
+                    .uri("/messages/1.html")
                     .body(Body::empty())
                     .unwrap(),
             )
@@ -502,7 +502,7 @@ mod tests {
         let response = app
             .oneshot(
                 Request::builder()
-                    .uri("/messages/1/plain")
+                    .uri("/messages/1.plain")
                     .body(Body::empty())
                     .unwrap(),
             )
@@ -525,7 +525,7 @@ mod tests {
         let response = app
             .oneshot(
                 Request::builder()
-                    .uri("/messages/1/source")
+                    .uri("/messages/1.source")
                     .body(Body::empty())
                     .unwrap(),
             )
@@ -551,7 +551,7 @@ mod tests {
         let response = app
             .oneshot(
                 Request::builder()
-                    .uri("/messages/1/eml")
+                    .uri("/messages/1.eml")
                     .body(Body::empty())
                     .unwrap(),
             )
