@@ -1,14 +1,15 @@
 {
+  "license": "MIT",
   "scripts": {
     "build": "webpack --progress --config assets/config/webpack.prod.js",
     "lint": "npm run -s lint:scripts && npm run -s lint:styles",
     "lint:scripts": "eslint assets/script/**/**/*.{js,vue}",
-    "lint:styles": "stylelint \"assets/styles/**/*.{css,sass,scss}\"",
+    "lint:styles": "stylelint \\\"assets/styles/**/*.{css,sass,scss}\\\"",
     "rmdist": "rimraf dist",
     "start": "webpack --watch --config assets/config/webpack.dev.js"
   },
   "devDependencies": {
-    "@swc/core": "^1.6.13",
+    "@swc/core": "^1.7.0",
     "autoprefixer": "^10.4.19",
     "clean-webpack-plugin": "^4.0.0",
     "copy-webpack-plugin": "^12.0.2",
@@ -43,14 +44,14 @@
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
-    "@tabler/core": "https://github.com/tabler/tabler.git#main",
+    "@tabler/core": "^1.0.0-beta.20",
     "axios": "^1.7.2",
     "axios-retry": "^4.4.1",
-    "bootstrap": "^5.2.3",
-    "dayjs": "^1.11.11",
+    "bootstrap": "^5.3.3",
+    "dayjs": "^1.11.12",
     "filesize": "^10.1.4",
     "postal-mime": "^2.2.6",
-    "vue": "^3.4.31",
+    "vue": "^3.4.33",
     "vue-axios": "^3.5.2",
     "vue-router": "^4.4.0",
     "vuex": "^4.1.0"

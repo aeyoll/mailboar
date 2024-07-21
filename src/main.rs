@@ -1,28 +1,21 @@
-use crate::html_template::HtmlTemplate;
 use crate::options::Options;
-use crate::templates::index::IndexTemplate;
 use axum::extract::State;
 use axum::handler::HandlerWithoutStateExt;
-use axum::{
-    http::StatusCode,
-    response::IntoResponse,
-    routing::get,
-    Router,
-};
+use axum::{http::StatusCode, response::IntoResponse, routing::get, Router};
+use mailboar_backend::repository::MessageRepository;
+use mailboar_backend::sse_clients::SseClients;
+use mailboar_backend::{http, smtp};
+use mailboar_frontend::html_template::HtmlTemplate;
+use mailboar_frontend::templates::index::IndexTemplate;
 use std::error::Error;
 use std::net::{Ipv4Addr, SocketAddr, TcpListener};
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use structopt::StructOpt;
-use tiny_mailcatcher::repository::MessageRepository;
-use tiny_mailcatcher::{http, smtp};
 use tower_http::services::ServeDir;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-mod asset;
-mod html_template;
 mod options;
-mod templates;
 
 struct AppState {
     api_url: String,
@@ -45,24 +38,31 @@ async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
     let state = Arc::new(AppState { api_url });
 
     let repository = Arc::new(Mutex::new(MessageRepository::new()));
+    let sse_clients = Arc::new(SseClients::new());
 
     tracing::info!("Mailboar is starting");
 
     // Start API
     let api_address = format!("{}:{}", &args.ip, args.api_port);
-    let api_listener = TcpListener::bind(&api_address).unwrap();
-    let api_handle = tokio::spawn(http::run_http_server(api_listener, repository.clone()));
-    tracing::debug!("API listening on {}", api_address);
+    let api_listener = tokio::net::TcpListener::bind(&api_address).await.unwrap();
+    let api_handle = tokio::spawn(http::run_http_server(
+        api_listener,
+        repository.clone(),
+        sse_clients.clone(),
+    ));
 
     // Start SMTP
     let smtp_address = format!("{}:{}", &args.ip, args.smtp_port);
     let smtp_listener = TcpListener::bind(&smtp_address).unwrap();
-    let smtp_handle = tokio::spawn(smtp::run_smtp_server(smtp_listener, repository.clone()));
-    tracing::debug!("SMTP listening on {}", smtp_address);
+    let smtp_handle = tokio::spawn(smtp::run_smtp_server(
+        smtp_listener,
+        repository.clone(),
+        sse_clients.clone(),
+    ));
 
     // Start frontend
     let service = handle_404.into_service();
-    let serve_dir = ServeDir::new("static").not_found_service(service);
+    let serve_dir = ServeDir::new("crates/frontend/static").not_found_service(service);
 
     let app = Router::new()
         .route("/", get(index))
@@ -73,7 +73,7 @@ async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
 
     let ip = Ipv4Addr::from_str(&args.ip)?;
     let addr = SocketAddr::from((ip, args.http_port));
-    tracing::debug!("Frontend listening on {}", addr);
+    tracing::info!("Starting Frontend HTTP server on {}", addr);
 
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     #[allow(clippy::let_unit_value)]
