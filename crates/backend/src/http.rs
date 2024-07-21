@@ -97,7 +97,7 @@ async fn sse_handler(
         }
     };
 
-    Sse::new(stream)
+    Sse::new(stream).keep_alive(axum::response::sse::KeepAlive::new())
 }
 
 async fn get_message_by_extension(
