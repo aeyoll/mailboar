@@ -1,6 +1,6 @@
 import { createApp } from 'vue';
 
-const app = createApp();
+const app = createApp({});
 
 // Axios
 // ----------------------------------------------------------------------------

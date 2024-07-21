@@ -23,9 +23,10 @@ First, install `mailboar` using Cargo:
 cargo install mailboar
 ```
 
-Then, clone this repository, and build the static assets using [https://yarnpkg.com/](yarn). Node >= 14 is required.
+Then, clone this repository, and build the static assets using [https://yarnpkg.com/](yarn). Node >= 20 is required.
 
 ```sh
+cd crates/frontend
 yarn # Install dependencies
 yarn run build # Build static assets
 ```
