@@ -75,6 +75,9 @@ const config= {
             sourceMap: true,
             api: 'modern-compiler',
             implementation: require.resolve('sass-embedded'),
+            sassOptions: {
+              quietDeps: true, // Disable warning when building dependencies
+            },
           } },
         ],
         type: 'javascript/auto',
