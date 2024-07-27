@@ -9,6 +9,7 @@
     "start": "rspack build --mode development --watch"
   },
   "devDependencies": {
+    "@rsdoctor/rspack-plugin": "^0.3.10",
     "@rspack/cli": "^0.7.5",
     "@rspack/core": "^0.7.5",
     "autoprefixer": "^10.4.19",

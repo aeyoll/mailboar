@@ -6,6 +6,7 @@ const { RspackManifestPlugin } = require('rspack-manifest-plugin');
 const { VueLoaderPlugin } = require('vue-loader');
 const ESLintPlugin = require('eslint-rspack-plugin');
 const StyleLintPlugin = require('stylelint-webpack-plugin');
+const { RsdoctorRspackPlugin } = require('@rsdoctor/rspack-plugin');
 
 const rootPath = process.cwd();
 
@@ -133,7 +134,13 @@ const config= {
       failOnError: false,
       customSyntax: 'postcss-scss',
     }),
-  ],
+
+    // Only register the plugin when RSDOCTOR is true, as the plugin will increase the build time.
+    process.env.RSDOCTOR &&
+      new RsdoctorRspackPlugin({
+        // plugin options
+      }),
+  ].filter(Boolean),
 };
 
 module.exports = config;
