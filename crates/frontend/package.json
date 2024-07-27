@@ -1,12 +1,12 @@
 {
   "license": "MIT",
   "scripts": {
-    "build": "rspack build --mode production",
+    "build": "NODE_ENV=production rspack build --mode production",
     "lint": "npm run -s lint:scripts && npm run -s lint:styles",
     "lint:scripts": "eslint assets/script/**/**/*.{js,vue}",
     "lint:styles": "stylelint assets/style/**/*.{css,sass,scss} assets/script/**/**/*.{vue}",
     "rmdist": "rimraf dist",
-    "start": "rspack build --mode development --watch"
+    "start": "NODE_ENV=development rspack build --mode development --watch"
   },
   "devDependencies": {
     "@rsdoctor/rspack-plugin": "^0.3.10",
