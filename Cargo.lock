@@ -863,7 +863,7 @@ checksum = "a7a70ba024b9dc04c27ea2f0c0548feb474ec5c54bba33a7f72f873a39d07b24"
 
 [[package]]
 name = "mailboar"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "axum",
  "env_logger",
@@ -882,7 +882,7 @@ dependencies = [
 
 [[package]]
 name = "mailboar_backend"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "async-stream",
  "axum",
@@ -905,7 +905,7 @@ dependencies = [
 
 [[package]]
 name = "mailboar_frontend"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "askama",
  "axum",

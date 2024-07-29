@@ -2,6 +2,18 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.3.1 - 2024-07-29
+#### Build system
+- **(deps)** update Rust dependencies - (02a961d) - *aeyoll*
+- **(deps)** upgrade JavaScript dependencies - (73145d4) - *aeyoll*
+- specify NODE_ENV when running build scripts - (a3d56b2) - aeyoll
+- allow to inspect rspack builds with RSDOCTOR=true - (ebce69d) - aeyoll
+- disable sass warnings for dependencies - (5b51d12) - aeyoll
+#### Performance Improvements
+- prevent page reload when going back to the index after going to a message page - (7dd850f) - aeyoll
+
+- - -
+
 ## v0.3.0 - 2024-07-21
 #### Build system
 - **(deps)** upgrade JavaScript dependencies - (14a2520) - *aeyoll*
