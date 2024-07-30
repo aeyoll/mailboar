@@ -1,6 +1,5 @@
 [package]
 name = "mailboar_backend"
-publish = false
 version.workspace = true
 edition.workspace = true
 description.workspace = true

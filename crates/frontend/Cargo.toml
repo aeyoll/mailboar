@@ -1,6 +1,5 @@
 [package]
 name = "mailboar_frontend"
-publish = false
 version.workspace = true
 edition.workspace = true
 description.workspace = true
@@ -10,7 +9,7 @@ documentation.workspace = true
 repository.workspace = true
 
 [dependencies]
-mailboar_backend = { path = "../backend" }
+mailboar_backend = { workspace = true }
 axum = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

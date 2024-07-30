@@ -25,8 +25,8 @@ members = [
 resolver = "2"
 
 [workspace.dependencies]
-mailboar_backend = { path = "crates/backend" }
-mailboar_frontend = { path = "crates/frontend" }
+mailboar_backend = { path = "crates/backend", version = "0.3.1" }
+mailboar_frontend = { path = "crates/frontend", version = "0.3.1" }
 axum = "0.7.5"
 env_logger = { version = "0.11.3", default-features = false }
 log = "0.4"
