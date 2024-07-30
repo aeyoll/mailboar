@@ -9,7 +9,7 @@ RUN     set -eux; \
 # Run
 FROM    alpine:3.16
 COPY    --from=compiler /mailboar/target/release/mailboar .
-COPY    --from=compiler /mailboar/crates/frontend/static ./static
+COPY    --from=compiler /mailboar/crates/frontend/static ./crates/frontend/static
 
 EXPOSE  1025 1080 8025
 
