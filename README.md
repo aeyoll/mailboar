@@ -2,7 +2,7 @@
 
 [![GitHub Actions workflow status](https://github.com/aeyoll/mailboar/workflows/ci/badge.svg)](https://github.com/aeyoll/mailboar/actions)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
-[![Minimum rustc version](https://img.shields.io/badge/rustc-1.62.0+-lightgray.svg)](#rust-version-requirements)
+[![Minimum rustc version](https://img.shields.io/badge/rustc-1.71.0+-lightgray.svg)](#rust-version-requirements)
 ![License](https://img.shields.io/github/license/aeyoll/toothpaste)
 
 Mailboar provides a web interface for [Tiny MailCatcher](https://github.com/pevdh/tiny-mailcatcher), a [MailCatcher](https://mailcatcher.me/) clone written in Rust.
@@ -65,4 +65,4 @@ yarn run start
 Rust version requirements
 ---
 
-1.62.0+
+1.71.0+
