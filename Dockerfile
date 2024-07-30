@@ -1,5 +1,5 @@
 # Compile
-FROM    rust:alpine3.16 AS compiler
+FROM    rust:alpine AS compiler
 RUN     apk add -q --update-cache --no-cache build-base openssl-dev git
 WORKDIR /mailboar
 COPY    . .
