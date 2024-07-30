@@ -2,6 +2,16 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.3.2 - 2024-07-30
+#### Build system
+- **(docker)** update static asset location - (6c7de82) - *aeyoll*
+- **(docker)** update alpine image - (2284d57) - *aeyoll*
+- allow to publish backend and frontend crates - (62a627a) - aeyoll
+#### Documentation
+- bump required rust version - (01159fd) - aeyoll
+
+- - -
+
 ## v0.3.1 - 2024-07-29
 #### Build system
 - **(deps)** update Rust dependencies - (02a961d) - *aeyoll*
