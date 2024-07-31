@@ -76,7 +76,7 @@ async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
 
     let ip = Ipv4Addr::from_str(&args.ip)?;
     let addr = SocketAddr::from((ip, args.http_port));
-    tracing::info!("Starting Frontend HTTP server on {}", addr);
+    tracing::info!("Starting Frontend HTTP server on http://{}", addr);
 
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     #[allow(clippy::let_unit_value)]
