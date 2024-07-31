@@ -5,6 +5,7 @@ use axum::{http::StatusCode, response::IntoResponse, routing::get, Router};
 use mailboar_backend::repository::MessageRepository;
 use mailboar_backend::sse_clients::SseClients;
 use mailboar_backend::{http, smtp};
+use mailboar_frontend::asset::set_assets_path;
 use mailboar_frontend::html_template::HtmlTemplate;
 use mailboar_frontend::templates::index::IndexTemplate;
 use std::error::Error;
@@ -62,7 +63,9 @@ async fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
 
     // Start frontend
     let service = handle_404.into_service();
-    let serve_dir = ServeDir::new("crates/frontend/static").not_found_service(service);
+    let assets_path = &args.assets_path;
+    set_assets_path(assets_path);
+    let serve_dir = ServeDir::new(assets_path).not_found_service(service);
 
     let app = Router::new()
         .route("/", get(index))

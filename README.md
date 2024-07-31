@@ -36,7 +36,7 @@ This will create a `static` repository with all the assets.
 Finally, launch `mailboar` from the cloned repository:
 
 ```sh
-mailboar --ip 127.0.0.1 --smtp-port=1025 --api-port=1080 --http-port=8025 # default values
+mailboar --ip 127.0.0.1 --smtp-port=1025 --api-port=1080 --http-port=8025 --assets-path=crates/frontend/static # default values
 ```
 
 ### Using Docker

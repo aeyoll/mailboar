@@ -17,4 +17,7 @@ pub struct Options {
 
     #[structopt(long, name = "http-port", default_value = "8025")]
     pub http_port: u16,
+
+    #[structopt(long, name = "assets-path", default_value = "crates/frontend/static")]
+    pub assets_path: String,
 }
