@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.3.4 - 2024-07-31
+#### Features
+- add scheme to displayed frontend address so its clickable in the terminal - (15e6591) - aeyoll
+- display the current mailboar version - (ccc4306) - aeyoll
+- add a script to easilly publish to crates.io - (666c27b) - aeyoll
+
+- - -
+
 ## v0.3.3 - 2024-07-31
 #### Features
 - allow to define the asset path from the command line arguments - (cf9f804) - aeyoll
