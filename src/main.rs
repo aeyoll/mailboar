@@ -98,7 +98,8 @@ async fn handle_404() -> (StatusCode, &'static str) {
 
 async fn index(State(state): State<Arc<AppState>>) -> impl IntoResponse {
     let api_url = state.api_url.clone();
-    let template = IndexTemplate { api_url };
+    let version = env!("CARGO_PKG_VERSION").to_string();
+    let template = IndexTemplate { api_url, version };
 
     HtmlTemplate(template)
 }

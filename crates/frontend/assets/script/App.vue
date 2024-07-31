@@ -10,6 +10,9 @@
             Mailboar
           </router-link>
         </h1>
+        <div class="navbar-nav flex-row order-md-last align-items-center">
+          <span class="navbar-brand-version">v{{ version }}</span>
+        </div>
       </div>
     </header>
     <div class="page-wrapper">
@@ -23,5 +26,10 @@
 <script>
 export default {
   name: 'App',
+  computed: {
+    version: function () {
+      return this.$store.state.version;
+    },
+  },
 };
 </script>

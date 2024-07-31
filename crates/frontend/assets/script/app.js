@@ -33,12 +33,14 @@ Object.keys(Components).forEach(key => {
 // Vuex
 // ----------------------------------------------------------------------------
 const apiUrl = document.getElementById('app').dataset.apiUrl ?? 'http://127.0.0.1:1080';
+const version = document.getElementById('app').dataset.version ?? 'unknown';
 
 import { createStore } from 'vuex';
 const store = createStore({
   state () {
     return {
       apiUrl: apiUrl,
+      version: version,
       messages: [],
     };
   },
