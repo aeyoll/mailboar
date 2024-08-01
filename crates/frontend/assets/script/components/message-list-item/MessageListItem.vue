@@ -1,10 +1,16 @@
 <template>
-  <tr class="message-list-item" @click.prevent="goToMessage()">
-    <td class="message-list-item-from">{{ from }}</td>
-    <td class="message-list-item-to">{{ to }}</td>
-    <td class="message-list-item-subject">{{ subject }}</td>
-    <td><abbr class="message-list-item-date" :title="formattedDate">{{ relativeDate }}</abbr></td>
-  </tr>
+  <div class="message-list-item" :class="{ 'active': active }" @click.prevent="goToMessage()">
+    <div class="d-flex">
+      <div class="flex-fill">
+        <div class="font-weight-medium">{{ from }}</div>
+        <div class="text-muted">{{ to }}</div>
+      </div>
+      <div class="text-muted ms-auto flex-shrink-0">
+        <abbr :title="formattedDate">{{ relativeDate }}</abbr>
+      </div>
+    </div>
+    <div class="text-truncate mt-1">{{ subject }}</div>
+  </div>
 </template>
 
 <script>
@@ -22,13 +28,8 @@ export default {
     },
   },
   computed: {
-    subject: function () {
-      const length = 70;
-      if (this.message.subject.length > length) {
-        return this.message.subject.substring(0, length) + '...';
-      } else {
-        return this.message.subject;
-      }
+    active() {
+      return 'id' in this.$route.params && parseInt(this.$route.params.id, 10) === this.message.id;
     },
   },
   methods: {
@@ -41,7 +42,19 @@ export default {
 
 <style scoped lang="scss">
   .message-list-item {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
     cursor: pointer;
+    padding: 1rem;
+
+    &:first-of-type {
+      border-top-left-radius: var(--tblr-border-radius);
+      border-top-right-radius: var(--tblr-border-radius);
+    }
+
+    &.active {
+      background-color: #fff;
+    }
   }
 
   .message-list-item-from,

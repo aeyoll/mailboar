@@ -1,77 +1,58 @@
 <template>
-  <div v-if="message" class="message-page">
-    <div class="page-header">
-      <div class="row align-items-center">
-        <div class="col">
-          <div class="page-pretitle">
-            {{ relativeDate }}
-          </div>
-          <h1 class="page-title">
-            {{ message.subject }}
-          </h1>
-        </div>
+  <div>
+    <div class="card mb-3">
+      <v-message-detail-definition :message="message" />
+    </div>
+
+    <div v-if="message" class="card">
+      <div class="card-header">
+        <ul class="nav nav-pills card-header-pills" data-bs-toggle="tabs">
+          <li v-for="(format) in message.formats" :key="format" class="nav-item">
+            <a :href="'#tabs-' + format" class="nav-link" :class="{ 'active': activeFormat === format }" data-bs-toggle="tab">
+              {{ format }}
+            </a>
+          </li>
+
+          <li v-if="message.attachments.length > 0" class="nav-item">
+            <a href="#tabs-attachments" class="nav-link" data-bs-toggle="tab">
+              Attachments
+            </a>
+          </li>
+        </ul>
+
         <div class="col-auto ms-auto">
           <div class="btn-list">
-            <a href="#" class="btn btn-danger" @click.prevent="deleteMessage()">
+            <button class="btn" @click.prevent="deleteMessage()">
+              <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-trash"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
               Delete
-            </a>
+            </button>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="page-body">
-      <div class="row">
-        <div class="col-sm-4">
-          <div class="card">
-            <v-message-detail-definition :message="message" />
+      <div class="card-body">
+        <div class="tab-content">
+          <div
+            v-for="(messageByFormat, format) in messageByFormats"
+            :id="'tabs-' + format"
+            :key="format"
+            class="tab-pane"
+            :class="{ 'active': format === activeFormat }"
+          >
+            <div v-if="format === 'plain'">
+              {{ messageByFormat }}
+            </div>
+            <div v-if="format === 'source'" class="format-source">
+              {{ messageByFormat }}
+            </div>
+            <v-message-html
+              v-if="format === 'html' && parsedMessage !== null"
+              :parsed-message="parsedMessage"
+            />
           </div>
-        </div>
 
-        <div class="col-sm-8">
-          <div v-if="message" class="card">
-            <div class="card-header">
-              <ul class="nav nav-pills card-header-pills" data-bs-toggle="tabs">
-                <li v-for="(format) in message.formats" :key="format" class="nav-item">
-                  <a :href="'#tabs-' + format" class="nav-link" :class="{ 'active': activeFormat === format }" data-bs-toggle="tab">
-                    {{ format }}
-                  </a>
-                </li>
-
-                <li v-if="message.attachments.length > 0" class="nav-item">
-                  <a href="#tabs-attachments" class="nav-link" data-bs-toggle="tab">
-                    Attachments
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div class="card-body">
-              <div class="tab-content">
-                <div
-                  v-for="(messageByFormat, format) in messageByFormats"
-                  :id="'tabs-' + format"
-                  :key="format"
-                  class="tab-pane"
-                  :class="{ 'active': format === activeFormat }"
-                >
-                  <div v-if="format === 'plain'">
-                    {{ messageByFormat }}
-                  </div>
-                  <div v-if="format === 'source'" class="format-source">
-                    {{ messageByFormat }}
-                  </div>
-                  <v-message-html
-                    v-if="format === 'html' && parsedMessage !== null"
-                    :parsed-message="parsedMessage"
-                  />
-                </div>
-
-                <div id="tabs-attachments" class="tab-pane">
-                  <v-message-attachments :attachments="message.attachments" />
-                </div>
-              </div>
-            </div>
+          <div id="tabs-attachments" class="tab-pane">
+            <v-message-attachments :attachments="message.attachments" />
           </div>
         </div>
       </div>
@@ -91,6 +72,7 @@ export default {
 
   data: function () {
     return {
+      loading: false,
       activeFormat: 'source',
       message: null,
       parsedMessage: null,
@@ -100,11 +82,18 @@ export default {
   },
 
   computed: mapState({
-    apiUrl: state => state.apiUrl,
+    ...mapState(['apiUrl']),
   }),
 
-  mounted: function () {
-    this.init();
+  created() {
+    // watch the params of the route to fetch the data again
+    this.$watch(
+      () => this.$route.params.id,
+      this.fetchData,
+      // fetch the data when the view is created and the data is
+      // already being observed
+      { immediate: true }
+    );
   },
 
   methods: {
@@ -126,50 +115,48 @@ export default {
         .axios
         .get(`${this.apiUrl}/messages/${messageId}.${format}`);
     },
-    async getSource(messageId) {
-      await this
-        .getFormat(messageId, 'source')
-        .then(response => {
-          let content = response.data;
-          this.messageByFormats['source'] = content;
+    async fetchData() {
+      // Reset the state
+      this.message = null;
+      this.parsedMessage = null;
+      this.messageByFormats = {};
+      this.loading = true;
+      this.inlineContent = {};
 
-          // Parse the email
-          const parser = new PostalMime.default();
-          parser.parse(content).then(res => {
-            this.parsedMessage = res;
-          });
-        });
-    },
-    async init() {
+      // Local state
       const messageId = this.$route.params.id;
+      const messageByFormats = {};
 
-      await this
-        .getMessage(messageId)
-        .then(response => {
-          const message = response.data;
-          message.formats.sort((a) => a === 'html' ? -1 : 1);
-          this.message = message;
-        });
+      // Fetch the message
+      try {
+        const { data } = await this.getMessage(messageId);
+        const message = data;
+        message.formats.sort((a) => a === 'html' ? -1 : 1); // Put the HTML at the top
+        this.message = message;
 
-      await this.getSource(messageId);
+        await Promise.all(this.message.formats.map(async (format) => {
+          const { data } = await this.getFormat(messageId, format);
+          let content = data;
+          messageByFormats[format] = content;
 
-      const formats = this
-        .message
-        .formats
-        .filter(format => ['source'].includes(format) === false);
+          if (format === 'html') {
+            this.activeFormat = 'html';
+          } else if (format === 'source') {
+            // Parse the email
+            const parser = new PostalMime.default();
+            parser.parse(content).then(res => {
+              this.parsedMessage = res;
+            });
+          }
+        }));
 
-      await formats.forEach(format => {
-        this
-          .getFormat(messageId, format)
-          .then(response => {
-            let content = response.data;
-            this.messageByFormats[format] = content;
-
-            if (format === 'html') {
-              this.activeFormat = 'html';
-            }
-          });
-      });
+        this.messageByFormats = {};
+        this.messageByFormats = {...messageByFormats};
+      } catch (error) {
+        console.error(error);
+      } finally {
+        this.loading = false;
+      }
     },
   },
 };

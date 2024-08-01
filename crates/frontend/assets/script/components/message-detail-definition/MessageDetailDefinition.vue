@@ -3,7 +3,7 @@
     <table class="table card-table table-striped">
       <tbody>
         <tr v-for="(definition, index) in definitions" :key="index">
-          <td class="label">
+          <td class="label" width="110">
             {{ definition.label }}
           </td>
           <td>
@@ -35,6 +35,7 @@ export default {
       return [
         {'label': 'From', value: this.message ? this.from : null},
         {'label': 'To', value: this.message ? this.to : null},
+        {'label': 'Subject', value: this.message ? this.subject : null},
       ];
     },
   },
@@ -42,8 +43,12 @@ export default {
 </script>
 
 <style scoped lang="scss">
-  .label {
-    font-weight: 700;
-    text-align: right;
-  }
+.table {
+  table-layout: fixed;
+}
+
+.label {
+  font-weight: 700;
+  text-align: right;
+}
 </style>
