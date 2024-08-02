@@ -3,35 +3,43 @@ use lettre::Address;
 use mail_parser::{MessageParser, MessagePart, MimeHeaders};
 use std::str::FromStr;
 
+/// Parse an email from raw bytes and build a Lettre Message
 pub fn parse_and_build_message(
     message_source: &[u8],
     to_address: &str,
 ) -> Result<Message, Box<dyn std::error::Error>> {
+    // Parse the raw email
     let parsed_email = parse_email(message_source)?;
+    // Build the 'to' address
     let to = build_to_address(to_address)?;
     let mut builder = Message::builder();
 
+    // Set the 'from' address, subject, and 'to' address
     builder = set_from_address(builder, &parsed_email)?;
     builder = set_subject(builder, &parsed_email)?;
     builder = builder.to(to);
 
+    // Build the email body
     let body = build_body(&parsed_email)?;
     let lettre_message = builder.multipart(body)?;
 
     Ok(lettre_message)
 }
 
+/// Parse raw email bytes into a mail_parser::Message
 fn parse_email(message_source: &[u8]) -> Result<mail_parser::Message, Box<dyn std::error::Error>> {
     MessageParser::default()
         .parse(message_source)
         .ok_or_else(|| "Failed to parse the email".into())
 }
 
+/// Build a Mailbox from a string address
 fn build_to_address(to_address: &str) -> Result<Mailbox, Box<dyn std::error::Error>> {
     let address = Address::from_str(to_address)?;
     Ok(Mailbox::new(None, address))
 }
 
+/// Set the 'from' address in the MessageBuilder
 fn set_from_address(
     builder: MessageBuilder,
     parsed_email: &mail_parser::Message,
@@ -45,6 +53,7 @@ fn set_from_address(
     Ok(builder.from(from_mailbox))
 }
 
+/// Set the subject in the MessageBuilder
 fn set_subject(
     builder: MessageBuilder,
     parsed_email: &mail_parser::Message,
@@ -56,6 +65,7 @@ fn set_subject(
     }
 }
 
+/// Build the email body, including attachments
 fn build_body(
     parsed_email: &mail_parser::Message,
 ) -> Result<MultiPart, Box<dyn std::error::Error>> {
@@ -76,6 +86,7 @@ fn build_body(
     Ok(multipart)
 }
 
+/// Build a multipart body for emails with multiple parts
 fn build_multipart_body(
     parsed_email: &mail_parser::Message,
 ) -> Result<MultiPart, Box<dyn std::error::Error>> {
@@ -85,6 +96,7 @@ fn build_multipart_body(
         let content_type = part.content_type().ok_or("Content type not found")?;
         let content = part.contents();
 
+        // Create the content type string
         let format = format!(
             "{}/{}",
             content_type.c_type,
@@ -92,6 +104,7 @@ fn build_multipart_body(
         );
         let lettre_content_type = lettre::message::header::ContentType::parse(&format)?;
 
+        // Add each part to the multipart body
         multipart = multipart.singlepart(
             SinglePart::builder()
                 .header(lettre_content_type)
@@ -102,6 +115,7 @@ fn build_multipart_body(
     Ok(multipart)
 }
 
+/// Build a single part body for emails with only one part
 fn build_singlepart_body(
     parsed_email: &mail_parser::Message,
 ) -> Result<SinglePart, Box<dyn std::error::Error>> {
@@ -110,6 +124,7 @@ fn build_singlepart_body(
         .ok_or("Content type not found")?;
     let content = parsed_email.body_text(0).ok_or("Body text not found")?;
 
+    // Create the content type string
     let format = format!(
         "{}/{}",
         content_type.c_type,
@@ -122,10 +137,13 @@ fn build_singlepart_body(
         .body(content.as_bytes().to_vec()))
 }
 
+/// Build an attachment part
 fn build_attachment(attachment: &MessagePart) -> Result<SinglePart, Box<dyn std::error::Error>> {
     let content_type = attachment
         .content_type()
         .ok_or("Attachment content type not found")?;
+
+    // Create the content type string
     let format = format!(
         "{}/{}",
         content_type.c_type,
@@ -133,6 +151,7 @@ fn build_attachment(attachment: &MessagePart) -> Result<SinglePart, Box<dyn std:
     );
     let lettre_content_type = lettre::message::header::ContentType::parse(&format)?;
 
+    // Set the filename and content disposition
     let filename = attachment.attachment_name().unwrap_or("attachment");
     let content_disposition = lettre::message::header::ContentDisposition::attachment(filename);
 
