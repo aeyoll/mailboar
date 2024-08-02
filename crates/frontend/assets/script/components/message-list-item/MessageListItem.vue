@@ -50,7 +50,7 @@ export default {
     // Dark mode
     [data-bs-theme="dark"] & {
       background-color: var(--tblr-bg-surface);
-      border-bottom: 1pixx solid var(--tblr-bg-surface-tertiary);
+      border-bottom: 1px solid var(--tblr-border-color-translucent);
     }
 
     &:first-of-type {
