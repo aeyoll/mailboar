@@ -47,6 +47,12 @@ export default {
     cursor: pointer;
     padding: 1rem;
 
+    // Dark mode
+    [data-bs-theme="dark"] & {
+      background-color: var(--tblr-bg-surface);
+      border-bottom: 1pixx solid var(--tblr-bg-surface-tertiary);
+    }
+
     &:first-of-type {
       border-top-left-radius: var(--tblr-border-radius);
       border-top-right-radius: var(--tblr-border-radius);
@@ -54,6 +60,11 @@ export default {
 
     &.active {
       background-color: #fff;
+
+      // Dark mode
+      [data-bs-theme="dark"] &{
+        background-color: var(--tblr-bg-surface-tertiary);
+      }
     }
   }
 
