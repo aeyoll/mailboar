@@ -24,7 +24,7 @@ mailparse = "0.15.0"
 memchr = "2.4.0"
 regex = "1.5.4"
 tokio-stream = "0.1.15"
-lettre = { version = "0.11.7", features = ["serde"] }
+lettre = { version = "0.11.7", features = ["serde", "tokio1", "tokio1-native-tls"] }
 mail-parser = "0.9.3"
 
 [dev-dependencies]

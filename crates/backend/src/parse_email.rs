@@ -160,3 +160,21 @@ fn build_attachment(attachment: &MessagePart) -> Result<SinglePart, Box<dyn std:
         .header(content_disposition)
         .body(attachment.contents().to_vec()))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_and_build_message() {
+        let message_source = include_bytes!("../../../test/fixtures/email.eml");
+        let to_address = "test@example.com";
+
+        let lettre_message = parse_and_build_message(message_source, to_address).unwrap();
+        let headers = lettre_message.headers();
+
+        assert_eq!("Hello there", headers.get_raw("Subject").unwrap());
+        assert_eq!("no-reply@example.com", headers.get_raw("From").unwrap());
+        assert_eq!(to_address, headers.get_raw("To").unwrap());
+    }
+}
