@@ -1,3 +1,5 @@
+[![Mailboar](https://raw.githubusercontent.com/aeyoll/mailboar/main/crates/frontend/static/images/logo.png)](https://github.com/aeyoll/mailboar)
+
 # Mailboar
 
 [![GitHub Actions workflow status](https://github.com/aeyoll/mailboar/workflows/ci/badge.svg)](https://github.com/aeyoll/mailboar/actions)
