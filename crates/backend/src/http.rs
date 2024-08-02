@@ -9,8 +9,9 @@ use axum::{
     Json, Router,
 };
 use futures::stream::Stream;
-use lettre::message::Mailbox;
-use lettre::{Address, SmtpTransport, Transport};
+use lettre::message::{Mailbox, MultiPart, SinglePart};
+use lettre::{Address, Message, SmtpTransport, Transport};
+use mail_parser::{ContentType, MessageParser, MimeHeaders};
 use serde::Deserialize;
 use std::io;
 use std::str::FromStr;
@@ -349,19 +350,6 @@ async fn send_message(
         .ok_or(StatusCode::NOT_FOUND)?
         .clone();
 
-    // Build the "from" address
-    let from = match message.sender {
-        Some(from) => {
-            let raw_email = parse_email(from.as_str());
-            let address = Address::from_str(raw_email.as_str()).map_err(|err| {
-                tracing::error!("Failed to parse the sender address: {}", err);
-                StatusCode::INTERNAL_SERVER_ERROR
-            })?;
-            Mailbox::new(None, address)
-        }
-        None => return Err(StatusCode::INTERNAL_SERVER_ERROR),
-    };
-
     // Build the "to" address
     let to_address = Address::from_str(payload.to.as_str()).map_err(|err| {
         tracing::error!("Failed to parse the recipient address: {}", err);
@@ -369,19 +357,80 @@ async fn send_message(
     })?;
     let to = Mailbox::new(None, to_address);
 
-    // Build the subject
-    let subject = message.subject.clone().unwrap_or("No subject".to_string());
+    // Parse the raw email using mail-parser crate
+    let parsed_email = MessageParser::default().parse(&message.source);
 
-    // Build the message body
-    let lettre_message = lettre::Message::builder()
-        .from(from)
-        .to(to)
-        .subject(subject)
-        .body(message.source.clone())
-        .map_err(|err| {
-            tracing::error!("Failed to build the message: {}", err);
-            StatusCode::INTERNAL_SERVER_ERROR
-        })?;
+    let parsed_email = match parsed_email {
+        Some(parsed_email) => parsed_email,
+        None => {
+            tracing::error!("Failed to parse the email.");
+            return Err(StatusCode::INTERNAL_SERVER_ERROR);
+        }
+    };
+
+    // Start building the Lettre message
+    let mut builder = Message::builder();
+
+    // Build the "from" address
+    let from = parsed_email.from().unwrap().first().unwrap();
+    let from_mailbox = Mailbox::new(None, from.address().unwrap().parse().unwrap());
+    builder = builder.from(from_mailbox);
+
+    // Build the "subject" header
+    if let Some(subject) = parsed_email.subject() {
+        builder = builder.subject(subject);
+    }
+
+    // Build the "to" address
+    builder = builder.to(to);
+
+    // Handle the body
+    let body = if parsed_email.parts.len() > 1 {
+        let mut multipart = MultiPart::alternative().build();
+
+        for part in parsed_email.parts {
+            // You might want to handle different content types differently
+            let content_type = part.content_type().unwrap();
+            let content = part.contents();
+
+            let c_type = content_type.c_type.clone();
+            let c_subtype = content_type.c_subtype.clone();
+
+            let format = format!("{}/{}", &c_type, &c_subtype.unwrap());
+            let lettre_content_type =
+                lettre::message::header::ContentType::parse(format.as_str()).unwrap();
+
+            multipart = multipart.singlepart(
+                SinglePart::builder()
+                    .header(lettre_content_type)
+                    .body(content.to_vec()),
+            );
+        }
+
+        multipart
+    } else {
+        let content_type = parsed_email.content_type().unwrap();
+        let content = parsed_email.body_text(0).unwrap();
+
+        let c_type = content_type.c_type.clone();
+        let c_subtype = content_type.c_subtype.clone();
+
+        let format = format!("{}/{}", &c_type, &c_subtype.unwrap());
+        let lettre_content_type =
+            lettre::message::header::ContentType::parse(format.as_str()).unwrap();
+
+        MultiPart::mixed().build().singlepart(
+            SinglePart::builder()
+                .header(lettre_content_type)
+                .body(content.as_bytes().to_vec()),
+        )
+    };
+
+    // Build the final message
+    let lettre_message = builder.multipart(body).map_err(|err| {
+        tracing::error!("Failed to build the message: {}", err);
+        StatusCode::INTERNAL_SERVER_ERROR
+    })?;
 
     // Send the message using lettre
     let mailer_dsn =

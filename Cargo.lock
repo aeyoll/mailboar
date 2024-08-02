@@ -860,6 +860,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a7a70ba024b9dc04c27ea2f0c0548feb474ec5c54bba33a7f72f873a39d07b24"
 
 [[package]]
+name = "mail-parser"
+version = "0.9.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ed5a1335c3a964788c90cb42ae04a34b5f2628e89566949ce3bd4ada695c0bcd"
+dependencies = [
+ "encoding_rs",
+]
+
+[[package]]
 name = "mailboar"
 version = "0.3.4"
 dependencies = [
@@ -887,6 +896,7 @@ dependencies = [
  "chrono",
  "futures",
  "lettre",
+ "mail-parser",
  "mailparse",
  "memchr",
  "regex",
