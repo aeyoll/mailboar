@@ -1,6 +1,6 @@
 use lettre::message::{Mailbox, Message, MessageBuilder, MultiPart, SinglePart};
 use lettre::Address;
-use mail_parser::{MessageParser, MimeHeaders};
+use mail_parser::{MessageParser, MessagePart, MimeHeaders};
 use std::str::FromStr;
 
 pub fn parse_and_build_message(
@@ -59,11 +59,21 @@ fn set_subject(
 fn build_body(
     parsed_email: &mail_parser::Message,
 ) -> Result<MultiPart, Box<dyn std::error::Error>> {
+    let mut multipart = MultiPart::mixed().build();
+
+    // Add the main body parts
     if parsed_email.parts.len() > 1 {
-        build_multipart_body(parsed_email)
+        multipart = multipart.multipart(build_multipart_body(parsed_email)?);
     } else {
-        build_singlepart_body(parsed_email)
+        multipart = multipart.singlepart(build_singlepart_body(parsed_email)?);
     }
+
+    // Add attachments
+    for attachment in parsed_email.attachments() {
+        multipart = multipart.singlepart(build_attachment(attachment)?);
+    }
+
+    Ok(multipart)
 }
 
 fn build_multipart_body(
@@ -94,7 +104,7 @@ fn build_multipart_body(
 
 fn build_singlepart_body(
     parsed_email: &mail_parser::Message,
-) -> Result<MultiPart, Box<dyn std::error::Error>> {
+) -> Result<SinglePart, Box<dyn std::error::Error>> {
     let content_type = parsed_email
         .content_type()
         .ok_or("Content type not found")?;
@@ -107,9 +117,27 @@ fn build_singlepart_body(
     );
     let lettre_content_type = lettre::message::header::ContentType::parse(&format)?;
 
-    Ok(MultiPart::mixed().build().singlepart(
-        SinglePart::builder()
-            .header(lettre_content_type)
-            .body(content.as_bytes().to_vec()),
-    ))
+    Ok(SinglePart::builder()
+        .header(lettre_content_type)
+        .body(content.as_bytes().to_vec()))
+}
+
+fn build_attachment(attachment: &MessagePart) -> Result<SinglePart, Box<dyn std::error::Error>> {
+    let content_type = attachment
+        .content_type()
+        .ok_or("Attachment content type not found")?;
+    let format = format!(
+        "{}/{}",
+        content_type.c_type,
+        content_type.c_subtype.as_deref().unwrap_or("")
+    );
+    let lettre_content_type = lettre::message::header::ContentType::parse(&format)?;
+
+    let filename = attachment.attachment_name().unwrap_or("attachment");
+    let content_disposition = lettre::message::header::ContentDisposition::attachment(filename);
+
+    Ok(SinglePart::builder()
+        .header(lettre_content_type)
+        .header(content_disposition)
+        .body(attachment.contents().to_vec()))
 }
