@@ -9,12 +9,9 @@ use axum::{
     Json, Router,
 };
 use futures::stream::Stream;
-use lettre::message::{Mailbox, MultiPart, SinglePart};
-use lettre::{Address, Message, SmtpTransport, Transport};
-use mail_parser::{ContentType, MessageParser, MimeHeaders};
+use lettre::{SmtpTransport, Transport};
 use serde::Deserialize;
 use std::io;
-use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
@@ -322,6 +319,7 @@ struct SendMessagePayload {
     to: String,
 }
 
+use crate::parse_email::parse_and_build_message;
 use regex::Regex;
 
 pub fn parse_email(raw_email: &str) -> String {
@@ -350,84 +348,7 @@ async fn send_message(
         .ok_or(StatusCode::NOT_FOUND)?
         .clone();
 
-    // Build the "to" address
-    let to_address = Address::from_str(payload.to.as_str()).map_err(|err| {
-        tracing::error!("Failed to parse the recipient address: {}", err);
-        StatusCode::INTERNAL_SERVER_ERROR
-    })?;
-    let to = Mailbox::new(None, to_address);
-
-    // Parse the raw email using mail-parser crate
-    let parsed_email = MessageParser::default().parse(&message.source);
-
-    let parsed_email = match parsed_email {
-        Some(parsed_email) => parsed_email,
-        None => {
-            tracing::error!("Failed to parse the email.");
-            return Err(StatusCode::INTERNAL_SERVER_ERROR);
-        }
-    };
-
-    // Start building the Lettre message
-    let mut builder = Message::builder();
-
-    // Build the "from" address
-    let from = parsed_email.from().unwrap().first().unwrap();
-    let from_mailbox = Mailbox::new(None, from.address().unwrap().parse().unwrap());
-    builder = builder.from(from_mailbox);
-
-    // Build the "subject" header
-    if let Some(subject) = parsed_email.subject() {
-        builder = builder.subject(subject);
-    }
-
-    // Build the "to" address
-    builder = builder.to(to);
-
-    // Handle the body
-    let body = if parsed_email.parts.len() > 1 {
-        let mut multipart = MultiPart::alternative().build();
-
-        for part in parsed_email.parts {
-            // You might want to handle different content types differently
-            let content_type = part.content_type().unwrap();
-            let content = part.contents();
-
-            let c_type = content_type.c_type.clone();
-            let c_subtype = content_type.c_subtype.clone();
-
-            let format = format!("{}/{}", &c_type, &c_subtype.unwrap());
-            let lettre_content_type =
-                lettre::message::header::ContentType::parse(format.as_str()).unwrap();
-
-            multipart = multipart.singlepart(
-                SinglePart::builder()
-                    .header(lettre_content_type)
-                    .body(content.to_vec()),
-            );
-        }
-
-        multipart
-    } else {
-        let content_type = parsed_email.content_type().unwrap();
-        let content = parsed_email.body_text(0).unwrap();
-
-        let c_type = content_type.c_type.clone();
-        let c_subtype = content_type.c_subtype.clone();
-
-        let format = format!("{}/{}", &c_type, &c_subtype.unwrap());
-        let lettre_content_type =
-            lettre::message::header::ContentType::parse(format.as_str()).unwrap();
-
-        MultiPart::mixed().build().singlepart(
-            SinglePart::builder()
-                .header(lettre_content_type)
-                .body(content.as_bytes().to_vec()),
-        )
-    };
-
-    // Build the final message
-    let lettre_message = builder.multipart(body).map_err(|err| {
+    let lettre_message = parse_and_build_message(&message.source, &payload.to).map_err(|err| {
         tracing::error!("Failed to build the message: {}", err);
         StatusCode::INTERNAL_SERVER_ERROR
     })?;
