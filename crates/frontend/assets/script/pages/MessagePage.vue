@@ -73,11 +73,17 @@
 import { emailMixin } from '../mixins/email';
 import { mapState } from 'vuex';
 import * as PostalMime from 'postal-mime';
+import { useToast } from '../composables/useToast';
 
 export default {
   name: 'MessagePage',
 
   mixins: [emailMixin],
+
+  setup() {
+    const { addToast } = useToast();
+    return { addToast };
+  },
 
   data: function () {
     return {
@@ -131,6 +137,9 @@ export default {
         .post(`${this.apiUrl}/messages/${this.message.id}/send`, { to })
         .then(() => {
           //
+        })
+        .catch(() => {
+          this.addToast('Failed to send the message', 'Please try again later', 'danger');
         });
     },
     openSendModal() {

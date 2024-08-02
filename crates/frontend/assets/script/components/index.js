@@ -5,6 +5,7 @@ import MessageAttachments from './message-attachments';
 import MessageHtml from './message-html';
 import AppHeader from './app-header';
 import SendMessageModal from './send-message-modal';
+import ToastNotifications from './toast-notifications';
 
 export default Object.assign({},
   AppHeader,
@@ -14,4 +15,5 @@ export default Object.assign({},
   MessageAttachments,
   MessageHtml,
   SendMessageModal,
+  ToastNotifications,
 );

@@ -7,7 +7,7 @@
         </button>
         <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
           <router-link :to="{ name: 'index' }" class="text-decoration-none d-inline-flex align-items-center gap-2">
-            <img src="../images/logo.png" alt="Mailboar" width="40" height="30" />
+            <img src="../images/logo.png" alt="Mailboar" width="40" height="30">
             Mailboar
           </router-link>
         </h1>
@@ -31,6 +31,9 @@
         </div>
       </div>
     </header>
+
+    <v-toast-notifications />
+
     <div class="page-wrapper">
       <div class="container-xxl">
         <v-app-header :messages="sortedMessages" />
@@ -52,8 +55,13 @@
 
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
+import { provideToast } from './composables/useToast';
+
 export default {
   name: 'App',
+  setup() {
+    provideToast();
+  },
   data: function() {
     return {
       theme: 'light',
