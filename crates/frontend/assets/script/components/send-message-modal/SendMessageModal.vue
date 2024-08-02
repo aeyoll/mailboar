@@ -48,6 +48,7 @@ export default {
   watch: {
     opened(newValue) {
       if (newValue) {
+        this.to = '';
         this.modal.show();
       } else {
         this.modal.hide();
@@ -55,8 +56,6 @@ export default {
     },
   },
   mounted() {
-    this.to = '';
-
     const modalElement = document.getElementById('send-message-modal');
 
     if (modalElement) {
