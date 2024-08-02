@@ -18,5 +18,13 @@ export const emailMixin = {
     relativeDate: function () {
       return dayjs().to(dayjs(this.message.created_at));
     },
+    subject: function () {
+      const length = 70;
+      if (this.message.subject.length > length) {
+        return this.message.subject.substring(0, length) + '...';
+      } else {
+        return this.message.subject;
+      }
+    },
   },
 };

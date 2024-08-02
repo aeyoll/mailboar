@@ -55,6 +55,11 @@ const store = createStore({
       state.messages = [];
     },
   },
+  getters: {
+    sortedMessages: function (state) {
+      return [...state.messages].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    },
+  },
   actions: {
     async addMessage({ commit }, message) {
       commit('addMessage', message);
