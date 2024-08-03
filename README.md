@@ -79,6 +79,8 @@ To be able to send emails to a specific address, you need to configure the SMTP 
 - `MAILBOAR_SMTP_DSN`: The DSN of the SMTP server to use. Defaults to `smtp://127.0.0.1:25`.
 - `MAILBOAR_SMTP_FROM`: The email address to use as the sender. Defaults to `mailboar@localhost`.
 
+The MAILBOAR_SMTP_DSN can be configured in multiple ways. Go to [lettre documentation](https://docs.rs/lettre/0.11.7/lettre/transport/smtp/struct.SmtpTransport.html#method.from_url) to see all the possible configurations.
+
 ### Using Docker
 
 There is also a small Docker image available, with all batteries included:
