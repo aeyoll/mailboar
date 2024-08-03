@@ -16,7 +16,8 @@ pub fn parse_and_build_message(
     let mut builder = Message::builder();
 
     // Set the 'from' address, subject, and 'to' address
-    let from_address = std::env::var("MAILBOAR_FROM_ADDRESS").unwrap_or("mailboar@localhost".to_string());
+    let from_address =
+        std::env::var("MAILBOAR_FROM_ADDRESS").unwrap_or("mailboar@localhost".to_string());
     let from = build_address(&from_address)?;
 
     builder = builder.from(from);
