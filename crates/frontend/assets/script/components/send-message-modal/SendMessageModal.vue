@@ -68,7 +68,6 @@ export default {
   methods: {
     sendMessage() {
       this.$emit('send-message', {to: this.to});
-      this.$emit('update:opened', false);
     },
   },
 };

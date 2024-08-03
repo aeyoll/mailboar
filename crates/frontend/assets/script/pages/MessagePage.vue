@@ -137,8 +137,10 @@ export default {
         .post(`${this.apiUrl}/messages/${this.message.id}/send`, { to })
         .then(() => {
           this.addToast('Message sent', 'The message has been sent successfully to ' + to, 'success');
+          this.showSendModal = false;
         })
-        .catch(() => {
+        .catch((error) => {
+          console.error(error);
           this.addToast('Failed to send the message', 'Please try again later', 'danger');
         });
     },
