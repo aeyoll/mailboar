@@ -1,0 +1,19 @@
+From: no-reply@example.com
+To: test@example.com
+Subject: Hello there
+Message-ID: <b06366e9a5a3ca9899abfba459a75d03@kaizen-hosting.com>
+MIME-Version: 1.0
+Date: Fri, 02 Aug 2024 14:37:06 +0000
+Content-Type: multipart/alternative; boundary=LW7LgaRM
+--LW7LgaRM
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Minima et quia iste temporibus eum voluptatem temporibus. Qui ducimus sunt =
+sit et porro enim. Cumque aliquid ut molestias odit aut.
+--LW7LgaRM
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+<p>Minima et quia iste temporibus eum voluptatem temporibus. Qui ducimus su=
+nt sit et porro enim. Cumque aliquid ut molestias odit aut.</p>
+--LW7LgaRM--
+

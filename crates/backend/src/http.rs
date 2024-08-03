@@ -5,10 +5,13 @@ use axum::{
     extract::{Path, State},
     http::{header, HeaderValue, StatusCode},
     response::{IntoResponse, Response, Sse},
-    routing::get,
+    routing::{get, post},
     Json, Router,
 };
+use email_address::*;
 use futures::stream::Stream;
+use lettre::{SmtpTransport, Transport};
+use serde::Deserialize;
 use std::io;
 use std::sync::{Arc, Mutex};
 use tokio::net::TcpListener;
@@ -33,6 +36,7 @@ fn router(repository: Arc<Mutex<MessageRepository>>, sse_clients: Arc<SseClients
             get(get_message_by_extension).delete(delete_message),
         )
         .route("/messages/:id/parts/:cid", get(get_message_part))
+        .route("/messages/:id/send", post(send_message))
         .route("/messages", get(get_messages).delete(delete_messages))
         .with_state(state)
 }
@@ -140,6 +144,7 @@ async fn get_message_json(
         .find(id)
         .map(|message| {
             let mut formats = vec!["source".to_string()];
+
             if message.html().is_some() {
                 formats.push("html".to_string());
             }
@@ -309,6 +314,65 @@ async fn get_message_part(
     }
 
     Ok(response)
+}
+#[derive(Deserialize)]
+struct SendMessagePayload {
+    to: String,
+}
+
+use crate::parse_email::parse_and_build_message;
+use regex::Regex;
+
+pub fn parse_email(raw_email: &str) -> String {
+    let regex = Regex::new(r"<(.*?)>").unwrap();
+
+    match regex.captures(raw_email) {
+        Some(captures) => captures
+            .get(1)
+            .map_or(String::new(), |m| m.as_str().to_string()),
+        None => String::new(),
+    }
+}
+
+/// Send a message using lettre
+async fn send_message(
+    Path(id): Path<usize>,
+    State(state): State<AppState>,
+    Json(payload): Json<SendMessagePayload>,
+) -> Result<impl IntoResponse, StatusCode> {
+    let repository = &state.repository;
+
+    let message = repository
+        .lock()
+        .unwrap()
+        .find(id)
+        .ok_or(StatusCode::NOT_FOUND)?
+        .clone();
+
+    let to_address = &payload.to;
+
+    // Check if the email address is valid
+    if !EmailAddress::is_valid(&to_address) {
+        return Err(StatusCode::BAD_REQUEST);
+    }
+
+    let lettre_message = parse_and_build_message(&message.source, &to_address).map_err(|err| {
+        tracing::error!("Failed to build the message: {}", err);
+        StatusCode::INTERNAL_SERVER_ERROR
+    })?;
+
+    // Send the message using lettre
+    let mailer_dsn =
+        std::env::var("MAILBOAR_SMTP_DSN").unwrap_or_else(|_| "smtp://127.0.0.1:25".to_string());
+
+    let mailer = SmtpTransport::from_url(&mailer_dsn).unwrap().build();
+
+    mailer.send(&lettre_message).map_err(|err| {
+        tracing::error!("Failed to send the message: {}", err);
+        StatusCode::INTERNAL_SERVER_ERROR
+    })?;
+
+    Ok(())
 }
 
 async fn delete_message(Path(id): Path<usize>, State(state): State<AppState>) -> StatusCode {

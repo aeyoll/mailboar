@@ -349,9 +349,12 @@ dependencies = [
 
 [[package]]
 name = "email_address"
-version = "0.2.7"
+version = "0.2.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "46b7a0ac6570e31bfe2c6cf575a576a55af9893d1a6b30b4444e6e90b216bb84"
+checksum = "e079f19b08ca6239f47f8ba8509c11cf3ea30095831f7fed61441475edd8c449"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "encoding_rs"
@@ -821,6 +824,7 @@ dependencies = [
  "nom",
  "percent-encoding",
  "quoted_printable",
+ "serde",
  "socket2",
  "tokio",
  "tokio-native-tls",
@@ -862,6 +866,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a7a70ba024b9dc04c27ea2f0c0548feb474ec5c54bba33a7f72f873a39d07b24"
 
 [[package]]
+name = "mail-parser"
+version = "0.9.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ed5a1335c3a964788c90cb42ae04a34b5f2628e89566949ce3bd4ada695c0bcd"
+dependencies = [
+ "encoding_rs",
+]
+
+[[package]]
 name = "mailboar"
 version = "0.3.4"
 dependencies = [
@@ -887,8 +900,10 @@ dependencies = [
  "async-stream",
  "axum",
  "chrono",
+ "email_address",
  "futures",
  "lettre",
+ "mail-parser",
  "mailparse",
  "memchr",
  "regex",

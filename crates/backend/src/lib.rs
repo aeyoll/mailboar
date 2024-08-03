@@ -4,6 +4,7 @@
 pub mod email;
 pub mod http;
 mod models;
+mod parse_email;
 pub mod repository;
 pub mod smtp;
 pub mod sse_clients;

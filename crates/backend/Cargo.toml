@@ -24,10 +24,12 @@ mailparse = "0.15.0"
 memchr = "2.4.0"
 regex = "1.5.4"
 tokio-stream = "0.1.15"
+lettre = { version = "0.11.7", features = ["serde", "tokio1", "tokio1-native-tls"] }
+mail-parser = "0.9.3"
+email_address = "0.2.9"
 
 [dev-dependencies]
 reqwest = { version = "0.12.5", features = ["json"] }
-lettre = { version = "0.11.7", features = ["tokio1", "tokio1-native-tls"] }
 
 [lib]
 name = "mailboar_backend"
