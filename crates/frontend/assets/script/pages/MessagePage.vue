@@ -136,7 +136,7 @@ export default {
         .axios
         .post(`${this.apiUrl}/messages/${this.message.id}/send`, { to })
         .then(() => {
-          //
+          this.addToast('Message sent', 'The message has been sent successfully to ' + to, 'success');
         })
         .catch(() => {
           this.addToast('Failed to send the message', 'Please try again later', 'danger');
