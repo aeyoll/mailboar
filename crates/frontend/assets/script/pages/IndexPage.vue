@@ -19,18 +19,12 @@
 </template>
 
 <script>
-import { mapActions, mapGetters, mapState } from 'vuex';
+import {mapGetters, mapState } from 'vuex';
 export default {
   name: 'IndexPage',
   computed: mapState({
     ...mapState(['apiUrl', 'messages']),
     ...mapGetters(['sortedMessages']),
   }),
-  mounted() {
-    this.fetchMessages();
-  },
-  methods: {
-    ...mapActions(['fetchMessages']),
-  },
 };
 </script>
