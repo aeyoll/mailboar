@@ -75,6 +75,15 @@ export default {
     this.fetchMessages();
     this.subscribeToSSE();
   },
+  beforeMount: function () {
+    // Detect if the user is using a dark theme
+    const isDarkTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    if (isDarkTheme) {
+      this.theme = 'dark';
+      this.changeTheme();
+    }
+  },
   beforeUnmount: function () {
     this.unsubscribeFromSSE();
   },
@@ -99,6 +108,11 @@ export default {
         this.eventSource = null;
       }
     },
+    changeTheme() {
+      document.documentElement.setAttribute('data-theme', this.theme);
+      document.documentElement.setAttribute('style', 'color-scheme: ' + this.theme);
+      document.getElementsByTagName('body')[0].setAttribute('data-bs-theme', this.theme);
+    },
     toggleTheme() {
       if (this.theme === 'dark') {
         this.theme = 'light';
@@ -106,9 +120,7 @@ export default {
         this.theme = 'dark';
       }
 
-      document.documentElement.setAttribute('data-theme', this.theme);
-      document.documentElement.setAttribute('style', 'color-scheme: ' + this.theme);
-      document.getElementsByTagName('body')[0].setAttribute('data-bs-theme', this.theme);
+      this.changeTheme();
     },
   },
 };
