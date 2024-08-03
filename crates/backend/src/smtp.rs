@@ -1,28 +1,32 @@
 use crate::email::parse_message;
 use crate::repository::MessageRepository;
 use crate::sse_clients::SseClients;
-use std::net::TcpListener as StdTcpListener;
 use std::sync::{Arc, Mutex};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
+use tokio_util::sync::CancellationToken;
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
 pub async fn run_smtp_server(
-    tcp_listener: StdTcpListener,
+    tcp_listener: TcpListener,
     repository: Arc<Mutex<MessageRepository>>,
     sse_clients: Arc<SseClients>,
+    token: CancellationToken,
 ) -> Result<()> {
     tracing::info!(
         "Starting SMTP server on {}",
         tcp_listener.local_addr().unwrap()
     );
 
-    tcp_listener.set_nonblocking(true).unwrap();
-    let listener = TcpListener::from_std(tcp_listener)?;
-
     loop {
-        let (socket, remote_ip) = listener.accept().await?;
+        let (socket, remote_ip) = tokio::select! {
+            result = tcp_listener.accept() => result?,
+            _ = token.cancelled() => {
+                return Ok(());
+            },
+        };
+
         let session_repository = Arc::clone(&repository);
         let session_sse_clients = Arc::clone(&sse_clients);
 

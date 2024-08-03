@@ -7,6 +7,7 @@ use std::net::SocketAddr;
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use tokio::task::JoinHandle;
+use tokio_util::sync::CancellationToken;
 
 fn create_repository_with_messages(messages: Vec<Message>) -> Arc<Mutex<MessageRepository>> {
     let mut repository = MessageRepository::new();
@@ -25,9 +26,10 @@ async fn launch_test_http_server(
 ) -> JoinHandle<()> {
     let addr = SocketAddr::from_str(format!("127.0.0.1:{}", port).as_str()).unwrap();
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
+    let token = CancellationToken::new();
 
     tokio::spawn(async move {
-        run_http_server(listener, repository.clone(), sse_clients.clone())
+        run_http_server(listener, repository.clone(), sse_clients.clone(), token)
             .await
             .unwrap()
     })

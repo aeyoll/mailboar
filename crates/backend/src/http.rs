@@ -15,6 +15,7 @@ use serde::Deserialize;
 use std::io;
 use std::sync::{Arc, Mutex};
 use tokio::net::TcpListener;
+use tokio_util::sync::CancellationToken;
 use tower_http::cors::CorsLayer;
 
 #[derive(Clone)]
@@ -45,12 +46,14 @@ pub async fn run_http_server(
     listener: TcpListener,
     repository: Arc<Mutex<MessageRepository>>,
     sse_clients: Arc<SseClients>,
+    token: CancellationToken,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     tracing::info!("Starting HTTP server on {}", listener.local_addr().unwrap());
 
     let app = router(repository, sse_clients).layer(CorsLayer::permissive());
 
     axum::serve(listener, app.into_make_service())
+        .with_graceful_shutdown(Box::leak(Box::new(token)).cancelled())
         .await
         .unwrap();
 
@@ -352,11 +355,11 @@ async fn send_message(
     let to_address = &payload.to;
 
     // Check if the email address is valid
-    if !EmailAddress::is_valid(&to_address) {
+    if !EmailAddress::is_valid(to_address) {
         return Err(StatusCode::BAD_REQUEST);
     }
 
-    let lettre_message = parse_and_build_message(&message.source, &to_address).map_err(|err| {
+    let lettre_message = parse_and_build_message(&message.source, to_address).map_err(|err| {
         tracing::error!("Failed to build the message: {}", err);
         StatusCode::INTERNAL_SERVER_ERROR
     })?;
