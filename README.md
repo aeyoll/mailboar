@@ -11,9 +11,12 @@ Mailboar is an email test server written in Rust.
 
 In the backend, it uses a fork of [Tiny MailCatcher](https://github.com/pevdh/tiny-mailcatcher), rewritten with the Axum framework, to provide extra features.
 
+- [Features](#features)
+- [REST API](#rest-api)
 - [Installation](#installation)
   - [Using Cargo, Git and Yarn](#using-cargo-git-and-yarn)
   - [Using Docker](#using-docker)
+  - [Environment variables configuration](#environment-variables-configuration)
 - [Development](#development)
 
 Features
