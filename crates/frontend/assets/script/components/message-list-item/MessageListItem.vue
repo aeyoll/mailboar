@@ -2,14 +2,20 @@
   <div class="message-list-item" :class="{ 'active': active }" @click.prevent="goToMessage()">
     <div class="d-flex">
       <div class="flex-fill">
-        <div class="font-weight-medium">{{ from }}</div>
-        <div class="text-muted">{{ to }}</div>
+        <div class="font-weight-medium">
+          {{ from }}
+        </div>
+        <div class="text-muted">
+          {{ to }}
+        </div>
       </div>
       <div class="text-muted ms-auto flex-shrink-0">
         <abbr :title="formattedDate">{{ relativeDate }}</abbr>
       </div>
     </div>
-    <div class="text-truncate mt-1">{{ subject }}</div>
+    <div class="text-truncate mt-1">
+      {{ subject }}
+    </div>
   </div>
 </template>
 
