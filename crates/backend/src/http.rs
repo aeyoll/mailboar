@@ -8,6 +8,7 @@ use axum::{
     routing::{get, post},
     Json, Router,
 };
+use email_address::*;
 use futures::stream::Stream;
 use lettre::{SmtpTransport, Transport};
 use serde::Deserialize;
@@ -348,7 +349,14 @@ async fn send_message(
         .ok_or(StatusCode::NOT_FOUND)?
         .clone();
 
-    let lettre_message = parse_and_build_message(&message.source, &payload.to).map_err(|err| {
+    let to_address = &payload.to;
+
+    // Check if the email address is valid
+    if !EmailAddress::is_valid(&to_address) {
+        return Err(StatusCode::BAD_REQUEST);
+    }
+
+    let lettre_message = parse_and_build_message(&message.source, &to_address).map_err(|err| {
         tracing::error!("Failed to build the message: {}", err);
         StatusCode::INTERNAL_SERVER_ERROR
     })?;
