@@ -91,10 +91,12 @@ app.use(store);
 import { createRouter, createWebHistory } from 'vue-router';
 import IndexPage from './pages/IndexPage.vue';
 import MessagePage from './pages/MessagePage.vue';
+import NotFoundPage from './pages/NotFoundPage.vue';
 
 const routes = [
   { path: '/', component: IndexPage, name: 'index' },
   { path: '/messages/:id', component: MessagePage, name: 'message' },
+  { path: '/:pathMatch(.*)*', component: NotFoundPage, name: 'not-found' },
 ];
 
 const router = createRouter({

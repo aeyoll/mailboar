@@ -37,7 +37,7 @@
     <div class="page-wrapper">
       <div class="container-xxl">
         <v-app-header :messages="sortedMessages" />
-        <div v-if="sortedMessages.length > 0" class="row">
+        <div v-if="sortedMessages.length > 0 && $route.name !== 'not-found'" class="row">
           <div class="col-sm-4">
             <v-message-list :messages="sortedMessages" />
           </div>

@@ -2,17 +2,7 @@
   <div>
     <div class="page-body">
       <div v-if="sortedMessages.length == 0" class="container-xl d-flex flex-column justify-content-center">
-        <div class="empty">
-          <div class="empty-img">
-            <img src="../../images/undraw_empty_street_sfxm.svg" alt="" height="128">
-          </div>
-          <p class="empty-title">
-            No mail to show (yet!)
-          </p>
-          <p class="empty-subtitle text-muted">
-            Send one and refresh this page.
-          </p>
-        </div>
+        <v-empty-state title="No mail to show (yet!)" subtitle="Send one and refresh this page." />
       </div>
     </div>
   </div>

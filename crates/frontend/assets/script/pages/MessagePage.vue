@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="card mb-3">
+    <div v-if="message" class="card mb-3">
       <v-message-detail-definition :message="message" />
     </div>
 
@@ -60,12 +60,15 @@
           </div>
         </div>
       </div>
-    </div>
 
-    <v-send-message-modal
-      v-model:opened="showSendModal"
-      @send-message="sendMessage($event)"
-    />
+      <v-send-message-modal
+        v-model:opened="showSendModal"
+        @send-message="sendMessage($event)"
+      />
+    </div>
+    <div v-else>
+      <v-empty-state title="Message not found" subtitle="The message you are looking for does not exist." />
+    </div>
   </div>
 </template>
 
