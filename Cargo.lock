@@ -1025,7 +1025,7 @@ dependencies = [
 
 [[package]]
 name = "mailboar"
-version = "0.4.2"
+version = "0.4.3"
 dependencies = [
  "axum",
  "env_logger",
@@ -1045,7 +1045,7 @@ dependencies = [
 
 [[package]]
 name = "mailboar_backend"
-version = "0.4.2"
+version = "0.4.3"
 dependencies = [
  "async-stream",
  "axum",
@@ -1071,7 +1071,7 @@ dependencies = [
 
 [[package]]
 name = "mailboar_frontend"
-version = "0.4.2"
+version = "0.4.3"
 dependencies = [
  "askama",
  "axum",
