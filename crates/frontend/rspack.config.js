@@ -128,7 +128,9 @@ const config= {
 
     new VueLoaderPlugin(),
 
-    new ESLintPlugin(),
+    new ESLintPlugin({
+      configType: 'flat',
+    }),
 
     new StyleLintPlugin({
       failOnError: false,
