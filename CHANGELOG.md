@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.4.2 - 2025-01-05
+#### Build system
+- fix openssl build - (cd172b2) - aeyoll
+
+- - -
+
 ## v0.4.1 - 2025-01-05
 #### Build system
 - fix build on arm64 - (21da96c) - aeyoll
