@@ -14,7 +14,7 @@ In the backend, it uses a fork of [Tiny MailCatcher](https://github.com/pevdh/ti
 - [Features](#features)
 - [REST API](#rest-api)
 - [Installation](#installation)
-  - [Using Cargo, Git and Yarn](#using-cargo-git-and-yarn)
+  - [Using Cargo, Git and pnpm](#using-cargo-git-and-pnpm)
   - [Using Docker](#using-docker)
   - [Environment variables configuration](#environment-variables-configuration)
 - [Development](#development)
@@ -51,7 +51,7 @@ In addition, the following endpoints are available:
 Installation
 ---
 
-### Using Cargo, Git and Yarn
+### Using Cargo, Git and pnpm
 
 First, install `mailboar` using Cargo:
 
@@ -59,12 +59,12 @@ First, install `mailboar` using Cargo:
 cargo install mailboar
 ```
 
-Then, clone this repository, and build the static assets using [https://yarnpkg.com/](yarn). Node >= 20 is required.
+Then, clone this repository, and build the static assets using [https://pnpm.io/](pnpm). Node >= 20 is required.
 
 ```sh
 cd crates/frontend
-yarn # Install dependencies
-yarn run build # Build static assets
+pnpm i # Install dependencies
+pnpm run build # Build static assets
 ```
 
 This will create a `static` repository with all the assets.
@@ -104,7 +104,7 @@ cargo watch -x 'run'
 Auto-compile static assets:
 
 ```sh
-yarn run start
+pnpm run start
 ```
 
 Rust version requirements
