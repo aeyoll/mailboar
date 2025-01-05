@@ -2,6 +2,16 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.4.5 - 2025-01-05
+#### Bug Fixes
+- improve empty state display - (d779d59) - aeyoll
+#### Build system
+- **(docker)** add perl dependency - (c609974) - *aeyoll*
+- move from yarn to pnpm - (63bd992) - aeyoll
+- update eslint plugin configType - (2831b9c) - aeyoll
+
+- - -
+
 ## v0.4.4 - 2025-01-05
 #### Build system
 - try to use vendored openssl version - (cbaa18f) - aeyoll
