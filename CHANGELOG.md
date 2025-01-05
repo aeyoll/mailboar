@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.4.4 - 2025-01-05
+#### Build system
+- try to use vendored openssl version - (cbaa18f) - aeyoll
+
+- - -
+
 ## v0.4.3 - 2025-01-05
 #### Build system
 - update cross compilation tools - (d07dd35) - aeyoll
