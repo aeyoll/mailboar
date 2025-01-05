@@ -23,8 +23,7 @@ impl Message {
     }
 
     pub fn html(&self) -> Option<&MessagePart> {
-        self
-            .parts
+        self.parts
             .iter()
             .find(|&p| p.typ == "text/html" || p.typ == "application/xhtml+xml")
     }

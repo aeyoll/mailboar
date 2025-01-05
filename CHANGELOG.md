@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.4.1 - 2025-01-05
+#### Build system
+- fix build on arm64 - (21da96c) - aeyoll
+#### Style
+- simplify returns - (56db8c0) - aeyoll
+
+- - -
+
 ## v0.4.0 - 2025-01-05
 #### Bug Fixes
 - prevent loading the messages twice in the homepage - (15c1b68) - aeyoll
