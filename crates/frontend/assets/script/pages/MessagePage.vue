@@ -66,7 +66,7 @@
         @send-message="sendMessage($event)"
       />
     </div>
-    <div v-else>
+    <div v-else-if="!loading">
       <v-empty-state title="Message not found" subtitle="The message you are looking for does not exist." />
     </div>
   </div>
