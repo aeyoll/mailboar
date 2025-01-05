@@ -19,14 +19,14 @@ pub struct Message {
 
 impl Message {
     pub fn plain(&self) -> Option<&MessagePart> {
-        return self.parts.iter().find(|&p| p.typ == "text/plain");
+        self.parts.iter().find(|&p| p.typ == "text/plain")
     }
 
     pub fn html(&self) -> Option<&MessagePart> {
-        return self
+        self
             .parts
             .iter()
-            .find(|&p| p.typ == "text/html" || p.typ == "application/xhtml+xml");
+            .find(|&p| p.typ == "text/html" || p.typ == "application/xhtml+xml")
     }
 }
 
