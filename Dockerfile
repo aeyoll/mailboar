@@ -1,6 +1,6 @@
 # Compile
 FROM    rust:alpine AS compiler
-RUN     apk add -q --update-cache --no-cache build-base openssl-dev git
+RUN     apk add -q --update-cache --no-cache build-base openssl-dev git perl
 WORKDIR /mailboar
 COPY    . .
 RUN     set -eux; \
