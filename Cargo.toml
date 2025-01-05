@@ -54,6 +54,7 @@ tokio-util = {  workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 structopt = { version = "0.3", default-features = false }
+openssl = { version = "0.10", features = ["vendored"] }
 
 [profile.release]
 lto = true      # Enable Link Time Optimization.
