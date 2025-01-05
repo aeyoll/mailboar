@@ -2,6 +2,27 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.4.0 - 2025-01-05
+#### Bug Fixes
+- prevent loading the messages twice in the homepage - (15c1b68) - aeyoll
+#### Build system
+- update javascript deps and rewrite eslint config for v9 - (fce9e4b) - aeyoll
+- update rust deps - (ada4661) - aeyoll
+#### Documentation
+- add missing items in the summary - (8945658) - aeyoll
+#### Features
+- add not found page - (0140bca) - aeyoll
+- allow graceful shutdown of services - (f543d57) - aeyoll
+- auto detect dark theme - (03f4197) - aeyoll
+- allow to send email to a real mailbox (#10) - (6cae8be) - aeyoll
+#### Refactoring
+- revamp the ui (better display, dark mode) (#9) - (01ef442) - aeyoll
+#### Style
+- add prettierrc config - (444596f) - aeyoll
+- apply eslint - (348067c) - aeyoll
+
+- - -
+
 ## v0.3.4 - 2024-07-31
 #### Features
 - add scheme to displayed frontend address so its clickable in the terminal - (15e6591) - aeyoll
