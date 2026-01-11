@@ -33,11 +33,11 @@ fn router(repository: Arc<Mutex<MessageRepository>>, sse_clients: Arc<SseClients
     Router::new()
         .route("/events", get(sse_handler))
         .route(
-            "/messages/:path",
+            "/messages/{path}",
             get(get_message_by_extension).delete(delete_message),
         )
-        .route("/messages/:id/parts/:cid", get(get_message_part))
-        .route("/messages/:id/send", post(send_message))
+        .route("/messages/{id}/parts/{cid}", get(get_message_part))
+        .route("/messages/{id}/send", post(send_message))
         .route("/messages", get(get_messages).delete(delete_messages))
         .with_state(state)
 }
