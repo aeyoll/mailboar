@@ -198,7 +198,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-@import '~@tabler/core/src/scss/_config.scss';
+@import '~@tabler/core/scss/_config.scss';
 
 .nav-link {
   text-transform: capitalize;
