@@ -11,7 +11,7 @@ use axum::{
 use email_address::*;
 use futures::stream::Stream;
 use lettre::{SmtpTransport, Transport};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::io;
 use std::sync::{Arc, Mutex};
 use tokio::net::TcpListener;
@@ -22,6 +22,11 @@ use tower_http::cors::CorsLayer;
 struct AppState {
     repository: Arc<Mutex<MessageRepository>>,
     sse_clients: Arc<SseClients>,
+}
+
+#[derive(Serialize)]
+struct Configuration {
+    can_forward: bool,
 }
 
 fn router(repository: Arc<Mutex<MessageRepository>>, sse_clients: Arc<SseClients>) -> Router {
@@ -39,6 +44,7 @@ fn router(repository: Arc<Mutex<MessageRepository>>, sse_clients: Arc<SseClients
         .route("/messages/{id}/parts/{cid}", get(get_message_part))
         .route("/messages/{id}/send", post(send_message))
         .route("/messages", get(get_messages).delete(delete_messages))
+        .route("/configuration", get(get_configuration))
         .with_state(state)
 }
 
@@ -58,6 +64,16 @@ pub async fn run_http_server(
         .unwrap();
 
     Ok(())
+}
+
+async fn get_configuration() -> Result<Json<Configuration>, StatusCode> {
+    // Can forward emails if the SMTP server is configured
+    let has_smtp_dsn = std::env::var("MAILBOAR_SMTP_DSN").is_ok();
+    let has_smtp_from = std::env::var("MAILBOAR_SMTP_FROM").is_ok();
+    let can_forward = has_smtp_dsn && has_smtp_from;
+    let configuration = Configuration { can_forward };
+
+    Ok(Json(configuration))
 }
 
 async fn get_messages(

@@ -72,6 +72,7 @@ export default {
     ...mapGetters(['sortedMessages']),
   },
   mounted: function () {
+    this.fetchConfiguration();
     this.fetchMessages();
     this.subscribeToSSE();
   },
@@ -88,7 +89,7 @@ export default {
     this.unsubscribeFromSSE();
   },
   methods: {
-    ...mapActions(['fetchMessages', 'addMessage', 'deleteMessages']),
+    ...mapActions(['fetchMessages', 'addMessage', 'deleteMessages', 'fetchConfiguration']),
     subscribeToSSE() {
       this.eventSource = new EventSource(`${this.apiUrl}/events`);
       this.eventSource.onmessage = (event) => {

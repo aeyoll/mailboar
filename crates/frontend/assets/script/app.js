@@ -39,6 +39,9 @@ import { createStore } from 'vuex';
 const store = createStore({
   state () {
     return {
+      configuration: {
+        canForward: false,
+      },
       apiUrl: apiUrl,
       version: version,
       messages: [],
@@ -54,6 +57,9 @@ const store = createStore({
     clearMessages(state) {
       state.messages = [];
     },
+    setConfiguration(state, configuration) {
+      state.configuration = configuration;
+    },
   },
   getters: {
     sortedMessages: function (state) {
@@ -63,6 +69,15 @@ const store = createStore({
   actions: {
     async addMessage({ commit }, message) {
       commit('addMessage', message);
+    },
+    async fetchConfiguration({ commit }) {
+      const response = await app.axios.get(`${apiUrl}/configuration`);
+
+      if (response.status !== 200) {
+        throw new Error('Failed to fetch configuration');
+      }
+
+      commit('setConfiguration', response.data);
     },
     async fetchMessages({ commit }) {
       const response = await app.axios.get(`${apiUrl}/messages`);
