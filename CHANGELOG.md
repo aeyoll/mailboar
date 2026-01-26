@@ -2,6 +2,15 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.4.6 - 2026-01-26
+#### Bug Fixes
+- add an elided lifetime - (3c29890) - *aeyoll*
+#### Build system
+- update JavaScript dependencies - (4c4b254) - *aeyoll*
+- update Rust dependencies - (77ced56) - *aeyoll*
+
+- - -
+
 ## v0.4.5 - 2025-01-05
 #### Bug Fixes
 - improve empty state display - (d779d59) - aeyoll

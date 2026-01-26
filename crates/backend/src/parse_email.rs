@@ -32,7 +32,9 @@ pub fn parse_and_build_message(
 }
 
 /// Parse raw email bytes into a mail_parser::Message
-fn parse_email(message_source: &[u8]) -> Result<mail_parser::Message<'_>, Box<dyn std::error::Error>> {
+fn parse_email(
+    message_source: &[u8],
+) -> Result<mail_parser::Message<'_>, Box<dyn std::error::Error>> {
     MessageParser::default()
         .parse(message_source)
         .ok_or_else(|| "Failed to parse the email".into())
