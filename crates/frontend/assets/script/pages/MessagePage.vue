@@ -4,7 +4,7 @@
       <v-message-detail-definition :message="message" />
     </div>
 
-    <div v-if="message" class="card">
+    <div v-if="message" class="card mb-6">
       <div class="card-header">
         <ul class="nav nav-pills card-header-pills" data-bs-toggle="tabs">
           <li v-for="(format) in message.formats" :key="format" class="nav-item">
