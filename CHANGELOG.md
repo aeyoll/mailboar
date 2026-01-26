@@ -2,6 +2,15 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.4.7 - 2026-01-26
+#### Bug Fixes
+- allow to display the "send" button only if the smtp is configured - (40601de) - *aeyoll*
+#### Miscellaneous Chores
+- (**cleanup**) remove an unused function - (d5bb223) - *aeyoll*
+- add a margin bellow the message list - (6ba0b14) - *aeyoll*
+
+- - -
+
 ## v0.4.6 - 2026-01-26
 #### Bug Fixes
 - add an elided lifetime - (3c29890) - *aeyoll*
