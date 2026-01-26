@@ -46,20 +46,6 @@ fn build_address(to_address: &str) -> Result<Mailbox, Box<dyn std::error::Error>
     Ok(Mailbox::new(None, address))
 }
 
-/// Set the 'from' address in the MessageBuilder
-// fn set_from_address(
-//     builder: MessageBuilder,
-//     parsed_email: &mail_parser::Message,
-// ) -> Result<MessageBuilder, Box<dyn std::error::Error>> {
-//     let from = parsed_email
-//         .from()
-//         .and_then(|f| f.first())
-//         .and_then(|f| f.address())
-//         .ok_or("From address not found")?;
-//     let from_mailbox = Mailbox::new(None, from.parse()?);
-//     Ok(builder.from(from_mailbox))
-// }
-
 /// Set the subject in the MessageBuilder
 fn set_subject(
     builder: MessageBuilder,
