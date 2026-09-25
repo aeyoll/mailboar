@@ -1,2 +1,71 @@
 @import 'config/config';
 @import 'vendors/vendors';
+
+:root {
+  // Ember is the mark's orange at full strength: identity only (avatars,
+  // selection, focus). Interactive fills use --tblr-primary, which is
+  // deepened for contrast.
+  --mb-ember: #d55e11;
+  // Gap the message list keeps from the viewport top once it sticks.
+  --mb-stick-top: 1rem;
+  // Stacked layout: the list must not eat the screen before the message.
+  --mb-list-height: 40vh;
+}
+
+@media (min-width: 576px) {
+  :root {
+    --mb-list-height: calc(100vh - var(--mb-stick-top) * 2);
+  }
+}
+
+// Tabler's light accents land between 2.9:1 and 3.8:1 on night surfaces, so
+// dark mode lifts each one and puts dark ink on the filled controls.
+[data-bs-theme='dark'] {
+  --mb-ember: #f08a3e;
+  --tblr-danger: #f06a6a;
+  --tblr-danger-fg: #2a0a0a;
+  --tblr-muted: #9ca3af;
+  --tblr-primary: #f08a3e;
+  --tblr-primary-fg: #1b1207;
+  --tblr-primary-rgb: 240, 138, 62;
+}
+
+::selection {
+  background-color: color-mix(in srgb, var(--mb-ember) 30%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--mb-ember);
+  outline-offset: 2px;
+}
+
+.form-control {
+  caret-color: var(--mb-ember);
+}
+
+// Timestamps, sizes and counts sit in columns that keep shifting as mail
+// arrives, so they line up digit by digit.
+.mb-numeric {
+  font-variant-numeric: tabular-nums;
+}
+
+.mb-scroll {
+  scrollbar-color: var(--tblr-border-color) transparent;
+  scrollbar-width: thin;
+}
+
+.mb-scroll::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+
+.mb-scroll::-webkit-scrollbar-thumb {
+  background-clip: content-box;
+  background-color: var(--tblr-border-color);
+  border: 3px solid transparent;
+  border-radius: 6px;
+}
+
+.mb-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: var(--tblr-secondary);
+}

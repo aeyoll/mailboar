@@ -1,25 +1,28 @@
 <template>
   <div id="send-message-modal" class="modal fade" tabindex="-1" aria-labelledby="send-message-modal-label" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-sm">
       <form class="modal-content" @submit.prevent="sendMessage">
         <div class="modal-header">
           <h5 id="send-message-modal-label" class="modal-title">
-            Send a message
+            Forward this message
           </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" />
         </div>
         <div class="modal-body">
           <div class="mb-3">
             <label for="send-message-to" class="form-label">To</label>
-            <input id="send-message-to" v-model="to" type="email" class="form-control" placeholder="Recipient's email">
+            <input id="send-message-to" v-model="to" type="email" class="form-control" placeholder="you@example.com" required>
+            <p class="form-hint">
+              Delivers a copy through the configured relay so you can read it in a real mailbox.
+            </p>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <button type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">
             Cancel
           </button>
           <button type="submit" class="btn btn-primary">
-            Send
+            Forward
           </button>
         </div>
       </form>

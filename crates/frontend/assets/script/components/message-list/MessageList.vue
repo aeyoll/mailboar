@@ -1,6 +1,6 @@
 <template>
   <div class="card message-list">
-    <div class="message-list-wrapper">
+    <div class="message-list-wrapper mb-scroll">
       <v-message-list-item
         v-for="message in messages"
         :key="message.id"
@@ -25,9 +25,21 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.message-list {
+  overflow: hidden;
+}
+
 .message-list-wrapper {
-  height: 80vh;
+  max-height: var(--mb-list-height);
   overflow-x: hidden;
   overflow-y: auto;
+}
+
+// The list only pins once it sits beside the message rather than above it.
+@media (min-width: 576px) {
+  .message-list {
+    position: sticky;
+    top: var(--mb-stick-top);
+  }
 }
 </style>

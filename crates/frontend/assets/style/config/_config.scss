@@ -1,3 +1,12 @@
 $google-font: false;
 $google-font-monospaced: false;
+
+// Satchel Orange, lifted from the boar mark (#d55e11) and deepened so white
+// text on a filled control clears 4.5:1. Tabler derives every tint from it.
+$primary: #c2560c;
+
+// Tabler's stock red only reaches 4.39:1 against the paper canvas, which the
+// destructive controls sit on.
+$danger: #c92a2a;
+
 @import 'bootstrap';

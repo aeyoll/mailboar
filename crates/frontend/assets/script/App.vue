@@ -2,32 +2,26 @@
   <div class="wrapper">
     <header class="navbar navbar-expand-md d-print-none">
       <div class="container-xl">
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu">
-          <span class="navbar-toggler-icon" />
-        </button>
-        <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
-          <router-link :to="{ name: 'index' }" class="text-decoration-none d-inline-flex align-items-center gap-2">
+        <h1 class="navbar-brand d-flex align-items-center gap-2 pe-0 pe-md-3">
+          <router-link :to="{ name: 'index' }" class="d-inline-flex align-items-center gap-2 text-decoration-none">
             <img src="../images/logo.png" alt="Mailboar" width="40" height="30">
             Mailboar
           </router-link>
+          <span class="navbar-version mb-numeric">v{{ version }}</span>
         </h1>
-        <div class="navbar-nav flex-row order-md-last align-items-center gap-2">
-          <a href="https://github.com/aeyoll/mailboar" class="btn" target="_blank" rel="noreferrer">
+
+        <div class="navbar-nav flex-row order-md-last align-items-center gap-1">
+          <a href="https://github.com/aeyoll/mailboar" class="btn btn-icon btn-ghost-secondary" target="_blank" rel="noreferrer" title="Source code" aria-label="Source code on GitHub">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"></path></svg>
-            Source code
           </a>
 
-          <button @click="toggleTheme()" class="nav-link px-0 hide-theme-dark" data-bs-toggle="tooltip" data-bs-placement="bottom" aria-label="Enable dark mode" data-bs-original-title="Enable dark mode">
+          <button class="btn btn-icon btn-ghost-secondary hide-theme-dark" title="Enable dark mode" aria-label="Enable dark mode" @click="toggleTheme()">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"></path></svg>
           </button>
 
-          <button @click="toggleTheme()" class="nav-link px-0 hide-theme-light" data-bs-toggle="tooltip" data-bs-placement="bottom" aria-label="Enable light mode" data-bs-original-title="Enable light mode">
+          <button class="btn btn-icon btn-ghost-secondary hide-theme-light" title="Enable light mode" aria-label="Enable light mode" @click="toggleTheme()">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"></path><path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7"></path></svg>
           </button>
-
-          <span class="navbar-brand-version">
-            v{{ version }}
-          </span>
         </div>
       </div>
     </header>
@@ -57,6 +51,8 @@
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { provideToast } from './composables/useToast';
 
+const THEME_STORAGE_KEY = 'mailboar-theme';
+
 export default {
   name: 'App',
   setup() {
@@ -77,8 +73,12 @@ export default {
     this.subscribeToSSE();
   },
   beforeMount: function () {
-    // Detect if the user is using a dark theme
-    const isDarkTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    // A stored choice wins over the OS preference, otherwise every reload
+    // would throw the user back to the system theme.
+    const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+    const isDarkTheme = storedTheme
+      ? storedTheme === 'dark'
+      : window.matchMedia('(prefers-color-scheme: dark)').matches;
 
     if (isDarkTheme) {
       this.theme = 'dark';
@@ -110,6 +110,7 @@ export default {
       }
     },
     changeTheme() {
+      localStorage.setItem(THEME_STORAGE_KEY, this.theme);
       document.documentElement.setAttribute('data-theme', this.theme);
       document.documentElement.setAttribute('style', 'color-scheme: ' + this.theme);
       document.getElementsByTagName('body')[0].setAttribute('data-bs-theme', this.theme);
@@ -126,3 +127,18 @@ export default {
   },
 };
 </script>
+
+<style scoped lang="scss">
+.navbar-brand {
+  font-size: 1.0625rem;
+  font-weight: var(--tblr-font-weight-bold);
+  letter-spacing: -.01em;
+  margin: 0;
+}
+
+.navbar-version {
+  color: var(--tblr-secondary);
+  font-size: .6875rem;
+  font-weight: var(--tblr-font-weight-normal);
+}
+</style>

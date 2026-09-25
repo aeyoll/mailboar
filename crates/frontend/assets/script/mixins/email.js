@@ -1,8 +1,12 @@
-import { parseEmail } from '../helpers/email';
-
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
-dayjs.extend(relativeTime);
+import {
+  formatDate,
+  formatRelativeDate,
+  formatSize,
+  formatSubject,
+  parseEmail,
+  parseEmails,
+  senderInitial as initialFrom,
+} from '../helpers/email';
 
 export const emailMixin = {
   computed: {
@@ -10,21 +14,22 @@ export const emailMixin = {
       return parseEmail(this.message.sender);
     },
     to: function() {
-      return this.message.recipients.map(recipient => parseEmail(recipient)).join(', ');
+      return parseEmails(this.message.recipients);
     },
     formattedDate: function () {
-      return dayjs(this.message.created_at).format('DD MMMM YYYY, hh:mm:ss');
+      return formatDate(this.message.created_at);
     },
     relativeDate: function () {
-      return dayjs().to(dayjs(this.message.created_at));
+      return formatRelativeDate(this.message.created_at);
     },
     subject: function () {
-      const length = 70;
-      if (this.message.subject.length > length) {
-        return this.message.subject.substring(0, length) + '...';
-      } else {
-        return this.message.subject;
-      }
+      return formatSubject(this.message.subject);
+    },
+    senderInitial: function () {
+      return initialFrom(this.from);
+    },
+    humanSize: function () {
+      return formatSize(this.message.size);
     },
   },
 };

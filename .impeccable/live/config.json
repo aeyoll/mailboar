@@ -1,0 +1,6 @@
+{
+  "files": ["crates/frontend/templates/layout.html"],
+  "insertBefore": "</body>",
+  "commentSyntax": "html",
+  "cspChecked": true
+}

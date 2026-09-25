@@ -57,7 +57,10 @@ export default {
     });
 
     const sendPostMessage = () => {
-      const height = htmlIframe.contentWindow.document.querySelector('body').offsetHeight;
+      // scrollHeight of the root, not offsetHeight of the body: the latter
+      // ignores the body margin most mail carries and leaves the frame a few
+      // pixels short, which shows up as a scrollbar inside the letter.
+      const height = htmlIframe.contentWindow.document.documentElement.scrollHeight;
 
       if (this.htmlIframeHeight !== height) {
         this.htmlIframeHeight = height;
@@ -78,5 +81,15 @@ export default {
 .message-html-iframe,
 .message-html-iframe iframe {
   width: 100%;
+}
+
+// Mail is authored against a white background; without this the letter would
+// render dark-on-dark once the app switches to its night theme. The border
+// frames the letter as the artifact it is, without restyling its contents.
+.message-html-iframe {
+  background-color: #fff;
+  border: 1px solid var(--tblr-border-color);
+  border-radius: var(--tblr-border-radius);
+  overflow: hidden;
 }
 </style>

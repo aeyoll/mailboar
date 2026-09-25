@@ -1,7 +1,7 @@
 <template>
   <div class="empty">
     <div class="empty-img">
-      <img src="../../../images/undraw_empty_street_sfxm.svg" alt="" height="128" width="284" class="img-fluid">
+      <img src="../../../images/logo.png" alt="" height="90" width="120">
     </div>
     <p class="empty-title">
       {{ title }}
@@ -29,7 +29,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.empty-img {
-  max-height: 128px;
+.empty-title {
+  font-size: 1.125rem;
 }
 </style>

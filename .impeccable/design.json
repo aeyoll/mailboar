@@ -1,0 +1,415 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-25T11:40:00.000Z",
+  "title": "Design System: Mailboar",
+  "extensions": {
+    "colorMeta": {
+      "satchel-orange": {
+        "role": "primary",
+        "displayName": "Satchel Orange",
+        "canonical": "#c2560c",
+        "tonalRamp": [
+          "oklch(26% 0.09 48)",
+          "oklch(36% 0.12 48)",
+          "oklch(46% 0.14 48)",
+          "oklch(55% 0.15 48)",
+          "oklch(66% 0.14 50)",
+          "oklch(78% 0.10 55)",
+          "oklch(88% 0.06 60)",
+          "oklch(96% 0.02 65)"
+        ]
+      },
+      "satchel-ember": {
+        "role": "primary",
+        "displayName": "Satchel Ember",
+        "canonical": "#d55e11",
+        "tonalRamp": [
+          "oklch(28% 0.09 47)",
+          "oklch(38% 0.12 47)",
+          "oklch(49% 0.15 47)",
+          "oklch(59% 0.16 47)",
+          "oklch(70% 0.14 50)",
+          "oklch(80% 0.10 55)",
+          "oklch(89% 0.06 60)",
+          "oklch(96% 0.02 65)"
+        ]
+      },
+      "satchel-night": {
+        "role": "primary",
+        "displayName": "Satchel Night",
+        "canonical": "#f08a3e",
+        "tonalRamp": [
+          "oklch(30% 0.08 53)",
+          "oklch(41% 0.11 53)",
+          "oklch(52% 0.13 53)",
+          "oklch(62% 0.14 53)",
+          "oklch(72% 0.14 53)",
+          "oklch(82% 0.10 56)",
+          "oklch(90% 0.06 60)",
+          "oklch(97% 0.02 65)"
+        ]
+      },
+      "satchel-on": {
+        "role": "neutral",
+        "displayName": "Satchel On",
+        "canonical": "#f9fafb",
+        "tonalRamp": [
+          "oklch(20% 0.005 260)",
+          "oklch(32% 0.005 260)",
+          "oklch(44% 0.005 260)",
+          "oklch(56% 0.004 260)",
+          "oklch(68% 0.004 260)",
+          "oklch(80% 0.003 260)",
+          "oklch(90% 0.003 260)",
+          "oklch(98% 0.002 260)"
+        ]
+      },
+      "paper-canvas": {
+        "role": "neutral",
+        "displayName": "Paper Canvas",
+        "canonical": "#f9fafb",
+        "tonalRamp": [
+          "oklch(20% 0.005 260)",
+          "oklch(32% 0.005 260)",
+          "oklch(44% 0.005 260)",
+          "oklch(56% 0.004 260)",
+          "oklch(68% 0.004 260)",
+          "oklch(80% 0.003 260)",
+          "oklch(90% 0.003 260)",
+          "oklch(98% 0.002 260)"
+        ]
+      },
+      "white-surface": {
+        "role": "neutral",
+        "displayName": "White Surface",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "oklch(18% 0 0)",
+          "oklch(30% 0 0)",
+          "oklch(42% 0 0)",
+          "oklch(55% 0 0)",
+          "oklch(68% 0 0)",
+          "oklch(80% 0 0)",
+          "oklch(92% 0 0)",
+          "oklch(100% 0 0)"
+        ]
+      },
+      "slate-ink": {
+        "role": "neutral",
+        "displayName": "Slate Ink",
+        "canonical": "#374151",
+        "tonalRamp": [
+          "oklch(18% 0.02 260)",
+          "oklch(28% 0.02 260)",
+          "oklch(38% 0.02 260)",
+          "oklch(45% 0.02 260)",
+          "oklch(55% 0.015 260)",
+          "oklch(68% 0.01 260)",
+          "oklch(82% 0.008 260)",
+          "oklch(94% 0.005 260)"
+        ]
+      },
+      "muted-ink": {
+        "role": "neutral",
+        "displayName": "Muted Ink",
+        "canonical": "#6b7280",
+        "tonalRamp": [
+          "oklch(22% 0.015 260)",
+          "oklch(32% 0.015 260)",
+          "oklch(42% 0.015 260)",
+          "oklch(52% 0.015 260)",
+          "oklch(62% 0.012 260)",
+          "oklch(74% 0.01 260)",
+          "oklch(86% 0.006 260)",
+          "oklch(95% 0.004 260)"
+        ]
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#e5e7eb",
+        "tonalRamp": [
+          "oklch(25% 0.01 260)",
+          "oklch(38% 0.01 260)",
+          "oklch(50% 0.008 260)",
+          "oklch(62% 0.008 260)",
+          "oklch(74% 0.006 260)",
+          "oklch(84% 0.005 260)",
+          "oklch(91% 0.004 260)",
+          "oklch(97% 0.003 260)"
+        ]
+      },
+      "night-paper": {
+        "role": "neutral",
+        "displayName": "Night Paper",
+        "canonical": "#111827",
+        "tonalRamp": [
+          "oklch(13% 0.02 260)",
+          "oklch(20% 0.02 260)",
+          "oklch(28% 0.02 260)",
+          "oklch(38% 0.018 260)",
+          "oklch(50% 0.015 260)",
+          "oklch(64% 0.01 260)",
+          "oklch(78% 0.008 260)",
+          "oklch(92% 0.005 260)"
+        ]
+      },
+      "slate-surface": {
+        "role": "neutral",
+        "displayName": "Slate Surface",
+        "canonical": "#1f2937",
+        "tonalRamp": [
+          "oklch(16% 0.02 260)",
+          "oklch(24% 0.02 260)",
+          "oklch(32% 0.02 260)",
+          "oklch(40% 0.018 260)",
+          "oklch(52% 0.014 260)",
+          "oklch(66% 0.01 260)",
+          "oklch(80% 0.007 260)",
+          "oklch(93% 0.004 260)"
+        ]
+      },
+      "night-hairline": {
+        "role": "neutral",
+        "displayName": "Night Hairline",
+        "canonical": "#374151",
+        "tonalRamp": [
+          "oklch(18% 0.02 260)",
+          "oklch(28% 0.02 260)",
+          "oklch(38% 0.02 260)",
+          "oklch(45% 0.02 260)",
+          "oklch(55% 0.015 260)",
+          "oklch(68% 0.01 260)",
+          "oklch(82% 0.008 260)",
+          "oklch(94% 0.005 260)"
+        ]
+      },
+      "night-muted": {
+        "role": "neutral",
+        "displayName": "Night Muted",
+        "canonical": "#9ca3af",
+        "tonalRamp": [
+          "oklch(24% 0.012 260)",
+          "oklch(35% 0.012 260)",
+          "oklch(46% 0.012 260)",
+          "oklch(56% 0.012 260)",
+          "oklch(69% 0.011 260)",
+          "oklch(79% 0.008 260)",
+          "oklch(88% 0.006 260)",
+          "oklch(96% 0.003 260)"
+        ]
+      },
+      "danger": {
+        "role": "primary",
+        "displayName": "Danger",
+        "canonical": "#c92a2a",
+        "tonalRamp": [
+          "oklch(24% 0.12 27)",
+          "oklch(34% 0.15 27)",
+          "oklch(44% 0.18 27)",
+          "oklch(52% 0.19 27)",
+          "oklch(63% 0.17 25)",
+          "oklch(75% 0.12 23)",
+          "oklch(86% 0.07 22)",
+          "oklch(95% 0.03 22)"
+        ]
+      },
+      "danger-night": {
+        "role": "primary",
+        "displayName": "Danger Night",
+        "canonical": "#f06a6a",
+        "tonalRamp": [
+          "oklch(28% 0.10 22)",
+          "oklch(39% 0.13 22)",
+          "oklch(50% 0.15 22)",
+          "oklch(60% 0.16 22)",
+          "oklch(70% 0.16 22)",
+          "oklch(80% 0.11 22)",
+          "oklch(89% 0.07 22)",
+          "oklch(96% 0.03 22)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Page title at 1.5rem. The one place the app raises its voice." },
+      "headline": { "displayName": "Headline", "purpose": "Message subject in the detail header." },
+      "title": { "displayName": "Title", "purpose": "Empty-state and modal titles." },
+      "body": { "displayName": "Body", "purpose": "Default UI, addresses, route labels at 14px." },
+      "label": { "displayName": "Label", "purpose": "Form labels and From/To keys. Same weight as body; position carries the role." },
+      "caption": { "displayName": "Caption", "purpose": "List route line, detail stamp, attachment table at 12px." },
+      "mono": { "displayName": "Mono", "purpose": "Raw message source only." }
+    },
+    "shadows": [
+      {
+        "name": "button-rest",
+        "value": "rgba(31, 41, 55, 0.06) 0px 1px 1px 0px",
+        "purpose": "Default chip buttons at rest."
+      },
+      {
+        "name": "card-ambient",
+        "value": "rgba(31, 41, 55, 0.04) 0 0 4px 0",
+        "purpose": "Cards in both themes."
+      },
+      {
+        "name": "selection-hairline",
+        "value": "inset 1px 0 0 0 var(--mb-ember)",
+        "purpose": "Selected message row. A 1px inset, not a rail."
+      },
+      {
+        "name": "navbar-inset-dark",
+        "value": "rgb(55, 65, 81) 0px -1px 0px 0px inset",
+        "purpose": "Dark navbar hairline, not a drop shadow."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-standard",
+        "value": "0.15s ease-in-out",
+        "purpose": "Bootstrap/Tabler default control transitions."
+      },
+      {
+        "name": "row-hover",
+        "value": "background-color 0.12s ease-out",
+        "purpose": "Message row hover wash."
+      },
+      {
+        "name": "message-arrives",
+        "value": "0.3s ease-out fade and 0.25rem settle, no fill-mode",
+        "purpose": "A row entering the list over SSE. No fill-mode so a row whose animation never runs still renders visible."
+      }
+    ],
+    "breakpoints": [
+      { "name": "list-stacks", "value": "576px" },
+      { "name": "container-sm", "value": "540px" },
+      { "name": "container-md", "value": "720px" },
+      { "name": "container-lg", "value": "960px" },
+      { "name": "container-xl", "value": "1140px" },
+      { "name": "container-xxl", "value": "1520px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Default Button",
+      "kind": "button",
+      "refersTo": "button-default",
+      "description": "Quiet chip for chrome and secondary work.",
+      "html": "<button class=\"ds-btn-default\" type=\"button\">Cancel</button>",
+      "css": ".ds-btn-default { display: inline-flex; align-items: center; gap: 8px; background: #ffffff; color: #374151; border: 1px solid #e5e7eb; border-radius: 6px; padding: 9px 16px; height: 40px; font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; font-size: 14px; font-weight: 500; line-height: 1.43; box-shadow: rgba(31, 41, 55, 0.06) 0px 1px 1px 0px; cursor: pointer; transition: background 0.15s ease-in-out; } .ds-btn-default:hover { background: #f9fafb; } .ds-btn-default:focus-visible { outline: 2px solid #d55e11; outline-offset: 2px; }"
+    },
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The committed action of a view: Forward.",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\">Forward</button>",
+      "css": ".ds-btn-primary { background: #c2560c; color: #f9fafb; border: 1px solid transparent; border-radius: 6px; padding: 9px 16px; height: 40px; font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; font-size: 14px; font-weight: 500; line-height: 1.43; cursor: pointer; transition: background 0.15s ease-in-out; } .ds-btn-primary:hover { background: #a54a0a; } .ds-btn-primary:focus-visible { outline: 2px solid #d55e11; outline-offset: 2px; }"
+    },
+    {
+      "name": "Ghost Danger Button",
+      "kind": "button",
+      "refersTo": "button-ghost-danger",
+      "description": "Delete and Delete all. Destructive work reads as a warning, not as a filled red button competing with the primary.",
+      "html": "<button class=\"ds-btn-ghost-danger\" type=\"button\"><svg class=\"ds-btn-icon\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 7h16\" /><path d=\"M10 11v6\" /><path d=\"M14 11v6\" /><path d=\"M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12\" /><path d=\"M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3\" /></svg>Delete</button>",
+      "css": ".ds-btn-ghost-danger { display: inline-flex; align-items: center; gap: 8px; background: transparent; color: #c92a2a; border: 1px solid transparent; border-radius: 6px; padding: 9px 16px; height: 40px; font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; } .ds-btn-ghost-danger:hover { background: #c92a2a; color: #ffffff; } .ds-btn-ghost-danger:focus-visible { outline: 2px solid #d55e11; outline-offset: 2px; } .ds-btn-icon { width: 24px; height: 24px; flex: none; }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Forward-modal To field. Label above, hint below.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">To</span><input class=\"ds-field-input\" type=\"email\" placeholder=\"you@example.com\" required /><span class=\"ds-field-hint\">Delivers a copy through the configured relay so you can read it in a real mailbox.</span></label>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 8px; font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; } .ds-field-label { font-size: 14px; color: #374151; } .ds-field-input { height: 36px; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 6px; background: #ffffff; color: #374151; font-size: 14px; caret-color: #d55e11; } .ds-field-input:focus-visible { outline: 2px solid #d55e11; outline-offset: 1px; } .ds-field-hint { font-size: 12px; color: #6b7280; }"
+    },
+    {
+      "name": "Top Nav",
+      "kind": "nav",
+      "refersTo": null,
+      "description": "56px bench bar: boar mark, wordmark, version chip, icon-only utilities.",
+      "html": "<header class=\"ds-nav\"><a class=\"ds-nav-brand\" href=\"#\"><svg class=\"ds-nav-mark\" viewBox=\"0 0 40 30\" width=\"40\" height=\"30\" aria-hidden=\"true\"><rect width=\"40\" height=\"30\" rx=\"4\" fill=\"#1f2937\" /><circle cx=\"14\" cy=\"16\" r=\"3\" fill=\"#d55e11\" /><circle cx=\"26\" cy=\"16\" r=\"3\" fill=\"#d55e11\" /></svg>Mailboar<span class=\"ds-nav-version\">v0.4.7</span></a><div class=\"ds-nav-end\"><button class=\"ds-nav-icon\" type=\"button\" title=\"Enable dark mode\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z\" /></svg></button></div></header>",
+      "css": ".ds-nav { display: flex; align-items: center; justify-content: space-between; height: 56px; padding: 4px 16px; background: #ffffff; box-shadow: rgba(31, 41, 55, 0.04) 0 0 4px 0; font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; } .ds-nav-brand { display: inline-flex; align-items: baseline; gap: 8px; color: #374151; text-decoration: none; font-weight: 600; font-size: 18px; } .ds-nav-mark { display: block; align-self: center; } .ds-nav-version { font-size: 11px; font-weight: 400; color: #6b7280; } .ds-nav-end { display: flex; align-items: center; gap: 4px; } .ds-nav-icon { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: transparent; border: 0; border-radius: 6px; color: #6b7280; cursor: pointer; } .ds-nav-icon:hover { background: #f3f4f6; color: #374151; }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "One card per job. The message detail is a single card, not a stack.",
+      "html": "<article class=\"ds-card\"><header class=\"ds-card-header\">Reset your password</header><div class=\"ds-card-body\">From, to, stamp.</div></article>",
+      "css": ".ds-card { background: #ffffff; color: #374151; border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: rgba(31, 41, 55, 0.04) 0 0 4px 0; overflow: hidden; font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; font-size: 14px; } .ds-card-header { padding: 16px; border-bottom: 1px solid #e5e7eb; font-size: 20px; font-weight: 600; } .ds-card-body { padding: 16px; }"
+    },
+    {
+      "name": "Message List Item",
+      "kind": "custom",
+      "refersTo": "list-item",
+      "description": "Caught-mail row as a router-link. Subject is the headline, addresses are the caption. Selected row lifts to the card surface with an ember inset hairline.",
+      "html": "<a class=\"ds-list-item ds-list-item-active\" href=\"#\"><span class=\"ds-list-avatar\">N</span><span class=\"ds-list-body\"><span class=\"ds-list-subject\">Reset your password</span><span class=\"ds-list-route\"><span class=\"ds-list-addresses\">noreply@staging.internal &rarr; dev@app.test</span><abbr class=\"ds-list-stamp\" title=\"2026-09-25 11:18:55\">2 min ago</abbr></span></span></a>",
+      "css": "@keyframes ds-message-arrives { from { opacity: 0; transform: translateY(-4px); } } .ds-list-item { display: flex; gap: 12px; padding: 14px 16px; background: #f9fafb; border-bottom: 1px solid #e5e7eb; color: #374151; text-decoration: none; font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; font-size: 14px; animation: ds-message-arrives 0.3s ease-out; transition: background-color 0.12s ease-out; } .ds-list-item:hover { background: #ffffff; } .ds-list-item-active { background: #ffffff; box-shadow: inset 1px 0 0 0 #d55e11; } .ds-list-avatar { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 32px; height: 32px; border-radius: 6px; background: #c2560c; color: #f9fafb; font-weight: 700; font-size: 12px; } .ds-list-body { display: grid; gap: 2px; min-width: 0; width: 100%; } .ds-list-subject { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .ds-list-route { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; min-width: 0; font-size: 12px; color: #6b7280; } .ds-list-addresses { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .ds-list-stamp { flex: none; border: 0; text-decoration: none; white-space: nowrap; font-variant-numeric: tabular-nums; } @media (prefers-reduced-motion: reduce) { .ds-list-item { animation: none; transition: none; } }"
+    },
+    {
+      "name": "Format Switcher",
+      "kind": "chip",
+      "refersTo": "segmented-tab",
+      "description": "Segmented HTML / Source / Plain text bar between the detail header and the body, with an attachment count badge.",
+      "html": "<nav class=\"ds-seg\"><a class=\"ds-seg-tab ds-seg-tab-active\" href=\"#\">HTML</a><a class=\"ds-seg-tab\" href=\"#\">Source</a><a class=\"ds-seg-tab\" href=\"#\">Plain text</a><a class=\"ds-seg-tab\" href=\"#\">Attachments <span class=\"ds-seg-badge\">2</span></a></nav>",
+      "css": ".ds-seg { display: inline-flex; gap: 2px; padding: 2px; border-radius: 6px; background: #f3f4f6; font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; } .ds-seg-tab { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 10px; border-radius: 6px; color: #6b7280; text-decoration: none; font-size: 14px; } .ds-seg-tab:hover { color: #374151; } .ds-seg-tab:focus-visible { outline: 2px solid #d55e11; outline-offset: 2px; } .ds-seg-tab-active { background: #ffffff; color: #374151; box-shadow: rgba(31, 41, 55, 0.06) 0px 1px 1px 0px; } .ds-seg-badge { padding: 1px 6px; border-radius: 4px; background: #e5e7eb; color: #374151; font-size: 11px; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Letter Frame",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Caught HTML on its own white sheet inside the message body, so it reads as a document laid on the bench. Height measured from documentElement.scrollHeight. Never restyle the letter itself.",
+      "html": "<div class=\"ds-letter\"><iframe class=\"ds-letter-frame\" title=\"Message HTML\" srcdoc=\"<p style='font-family:Georgia,serif;padding:24px'>Choose a new password</p>\"></iframe></div>",
+      "css": ".ds-letter { padding: 16px; } .ds-letter-frame { display: block; width: 100%; min-height: 160px; border: 1px solid #e5e7eb; border-radius: 8px; background: #ffffff; overflow: hidden; }"
+    },
+    {
+      "name": "Source Pane",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Raw source as mono on a recessed surface with a thin custom scrollbar, so it reads as a code surface rather than body copy.",
+      "html": "<pre class=\"ds-source\">From: noreply@staging.internal\nTo: dev@app.test\nSubject: Reset your password</pre>",
+      "css": ".ds-source { margin: 16px; padding: 16px; border: 1px solid #e5e7eb; border-radius: 6px; background: #f9fafb; color: #374151; font-family: Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size: 12px; line-height: 1.5; overflow: auto; scrollbar-width: thin; scrollbar-color: #e5e7eb transparent; }"
+    },
+    {
+      "name": "Empty State",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Boar mark at native size, a title, and one line saying what to do and what will happen. Never tells the user to refresh; the list fills itself over SSE.",
+      "html": "<div class=\"ds-empty\"><svg class=\"ds-empty-art\" viewBox=\"0 0 120 90\" width=\"120\" height=\"90\" aria-hidden=\"true\"><rect width=\"120\" height=\"90\" rx=\"8\" fill=\"#f3f4f6\" /><circle cx=\"44\" cy=\"46\" r=\"7\" fill=\"#d55e11\" /><circle cx=\"76\" cy=\"46\" r=\"7\" fill=\"#d55e11\" /></svg><p class=\"ds-empty-title\">No mail caught yet</p><p class=\"ds-empty-sub\">Point your app's SMTP at this server. New messages appear here on their own.</p></div>",
+      "css": ".ds-empty { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 48px 16px; font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; } .ds-empty-art { margin-bottom: 16px; } .ds-empty-title { margin: 0 0 8px; font-size: 18px; font-weight: 600; color: #374151; } .ds-empty-sub { margin: 0; max-width: 46ch; font-size: 14px; color: #6b7280; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Inspection Bench",
+    "overview": "Mailboar is a tester's bench, not a product site. The job is to scan a caught-mail list, open a payload, and read HTML, plain, or source without the chrome competing with the letter. Tabler (on Bootstrap 5) is the chassis: Inter, 14px density, gray paper, 6–8px corners, faint admin shadows.\n\nPersonality is a little more animal/tool than a generic dashboard, and it now comes from the product's own colour rather than a borrowed one. The accent is lifted straight out of the boar mark, so the app and its mascot share a pigment. That is the whole brand move: no display face, no marketing layout, no illustration library.\n\nLight and dark are equal operating modes. Theme follows prefers-color-scheme on first load, is remembered in localStorage after that, and flips from a moon/sun toggle. New UI must ship both, and both must clear 4.5:1 on text.",
+    "keyCharacteristics": [
+      "List/detail inspection layout, not a marketing funnel",
+      "Tabler admin density (14px Inter) with the boar mark as the only mascot",
+      "Satchel Orange for committed actions and for 'this is the row you are reading'",
+      "Paper canvas vs raised surfaces; shadows are 1–4px whispers",
+      "The email HTML is an iframe artifact — framed like a letter, never restyled"
+    ],
+    "rules": [
+      { "name": "The Satchel Orange Rule", "body": "The accent marks two things and nothing else: the committed action of a view (Forward), and the message you are currently reading. It never paints nav, page chrome, or more than a thin slice of the screen.", "section": "colors" },
+      { "name": "The Dual-Shift Rule", "body": "Every surface has a paper reading and a night-paper reading, and the relationship between them must survive the flip. Tabler's tertiary surface collapses onto its card surface in dark, so the list rows recess to Night Paper there instead — the selected row still lifts either way.", "section": "colors" },
+      { "name": "The 4.5 Floor Rule", "body": "Every text colour is measured against the surface it actually lands on, in both themes, before it ships. Four of the accents in this system were re-cut for that reason.", "section": "colors" },
+      { "name": "The One Voice Type Rule", "body": "Inter is the UI. Source is the only mono exception. Do not introduce a second face.", "section": "typography" },
+      { "name": "The Subject-First Rule", "body": "In any list of caught mail, the subject is the headline and the addresses are the caption. A tester scans for what was sent, not who sent it.", "section": "typography" },
+      { "name": "The Whisper Shadow Rule", "body": "Surfaces are separated by tone and 1px hairlines. If a shadow is heavier than ~4px blur, it is out of system.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep Inter at 14px and Tabler spacing (8 / 16 / 24) unless a measured exception already exists (1520px xxl, the list well).",
+      "Do put Satchel Orange on the committed action and on the selected row.",
+      "Do measure new text colours against their real surface in both themes.",
+      "Do bind surfaces to Tabler --tblr-* variables and override them per theme, rather than writing one-off hexes.",
+      "Do frame the caught HTML as a letter and leave its contents alone.",
+      "Do give every icon-only control a title."
+    ],
+    "donts": [
+      "Don't add hero type, marketing sections, or a second typeface.",
+      "Don't wash backgrounds or nav in the accent.",
+      "Don't introduce shadows heavier than the whisper set, or radii outside 4 / 6 / 8.",
+      "Don't nest a card inside a card to separate two parts of one message.",
+      "Don't restyle the email document to match the app.",
+      "Don't write light-only hexes into a component; the theme block is the place for a dark value."
+    ]
+  }
+}

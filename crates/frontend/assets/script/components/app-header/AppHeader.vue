@@ -2,17 +2,16 @@
   <div class="page-header mb-3">
     <div class="row align-items-center">
       <div class="col">
-        <div class="page-title">
-          <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
-          You have {{ messages.length }} message<template v-if="messages.length > 1">s</template>
-        </div>
+        <h2 class="page-title mb-numeric">
+          {{ heading }}
+        </h2>
       </div>
+
       <div v-if="messages.length > 0" class="col-auto ms-auto">
         <div class="btn-list">
-          <button class="btn" @click.prevent="localDeleteMessages()">
-            <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
+          <button class="btn btn-ghost-danger" @click.prevent="localDeleteMessages()">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-trash"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
-            Delete all messages ({{ messages.length }})
+            Delete all
           </button>
         </div>
       </div>
@@ -32,6 +31,15 @@ export default {
       },
     },
   },
+  computed: {
+    heading() {
+      if (this.messages.length === 0) {
+        return 'No messages';
+      }
+
+      return this.messages.length === 1 ? '1 message' : `${this.messages.length} messages`;
+    },
+  },
   methods: {
     ...mapActions(['deleteMessages']),
     localDeleteMessages() {
@@ -41,3 +49,10 @@ export default {
   },
 };
 </script>
+
+<style scoped lang="scss">
+.page-title {
+  font-size: 1.5rem;
+  letter-spacing: -.01em;
+}
+</style>
